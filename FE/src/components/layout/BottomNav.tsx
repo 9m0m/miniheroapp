@@ -12,11 +12,11 @@ interface BottomNavProps {
 
 export default function BottomNav({ activeTab, onSelectTab }: BottomNavProps) {
   const tabs = [
-    { id: 'BATTLE' as TabType, label: 'Chiến Đấu', icon: Swords },
-    { id: 'PARTY' as TabType, label: 'Tướng & Đồ', icon: Users },
+    { id: 'BATTLE' as TabType, label: 'Battle', icon: Swords },
+    { id: 'PARTY' as TabType, label: 'Heroes', icon: Users },
     { id: 'CUBE' as TabType, label: 'The Cube', icon: Box },
-    { id: 'ALCHEMY' as TabType, label: 'Giả Kim', icon: FlaskConical },
-    { id: 'BLACKSMITH' as TabType, label: 'Thợ Rèn', icon: Anvil },
+    { id: 'ALCHEMY' as TabType, label: 'Alchemy', icon: FlaskConical },
+    { id: 'BLACKSMITH' as TabType, label: 'Blacksmith', icon: Anvil },
   ];
 
   return (

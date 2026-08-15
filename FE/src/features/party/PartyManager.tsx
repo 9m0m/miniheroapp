@@ -1,114 +1,360 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '@/store/useGameStore';
-import { HeroClass, ItemSlot } from '@/types/game.types';
+import { HeroClass, ItemSlot, ItemInstance } from '@/types/game.types';
 import { calculateTheoreticalDPS } from '@/engine/damageCalculator';
-import { Shield, Zap, Heart, Sword, Crosshair, Sparkles, Plus } from 'lucide-react';
+import {
+  Shield,
+  Zap,
+  Heart,
+  Sword,
+  Crosshair,
+  Sparkles,
+  Hammer,
+  X,
+  Swords,
+  Users,
+  CheckCircle2,
+  PlusCircle,
+  TrendingUp,
+  UserCheck,
+  UserX,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 
-const CLASS_CONFIG: Record<HeroClass, { name: string; icon: string; color: string }> = {
-  WARRIOR: { name: 'Arthur', icon: '🛡️', color: 'from-blue-600 to-indigo-700' },
-  RANGER: { name: 'Robin', icon: '🏹', color: 'from-emerald-600 to-teal-700' },
-  MAGE: { name: 'Merlin', icon: '🔮', color: 'from-purple-600 to-violet-700' },
-  PRIEST: { name: 'Elena', icon: '💖', color: 'from-rose-500 to-pink-700' },
+const CLASS_CONFIG: Record<HeroClass, { name: string; role: string; icon: string; color: string; bgBadge: string }> = {
+  WARRIOR: { name: 'Warrior', role: 'Frontline Tank', icon: '🛡️', color: 'from-blue-600 to-indigo-700', bgBadge: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+  RANGER: { name: 'Archer', role: 'Physical Ranged DPS', icon: '🏹', color: 'from-emerald-600 to-teal-700', bgBadge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
+  MAGE: { name: 'Wizard', role: 'Elemental Magic DPS', icon: '🔮', color: 'from-purple-600 to-violet-700', bgBadge: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+  PRIEST: { name: 'Priest', role: 'Holy Support & Healer', icon: '💖', color: 'from-rose-500 to-pink-700', bgBadge: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
 };
 
 const ALL_SLOTS: { slot: ItemSlot; label: string; icon: string }[] = [
-  { slot: 'MAIN_HAND', label: 'Vũ Khí', icon: '⚔️' },
-  { slot: 'OFF_HAND', label: 'Vũ Khí Phụ', icon: '🛡️' },
-  { slot: 'HELMET', label: 'Mũ Giáp', icon: '🪖' },
-  { slot: 'ARMOR', label: 'Áo Giáp', icon: '🥋' },
-  { slot: 'PANTS', label: 'Quần Giáp', icon: '👖' },
-  { slot: 'BOOTS', label: 'Giày', icon: '👢' },
-  { slot: 'RING_1', label: 'Nhẫn 1', icon: '💍' },
-  { slot: 'RING_2', label: 'Nhẫn 2', icon: '💍' },
-  { slot: 'NECKLACE', label: 'Dây Chuyền', icon: '📿' },
-  { slot: 'TALISMAN', label: 'Bùa Chú', icon: '🧿' },
+  { slot: 'MAIN_HAND', label: 'Main Weapon', icon: '⚔️' },
+  { slot: 'OFF_HAND', label: 'Off-Hand', icon: '🛡️' },
+  { slot: 'HELMET', label: 'Helmet', icon: '🪖' },
+  { slot: 'ARMOR', label: 'Armor', icon: '🥋' },
+  { slot: 'PANTS', label: 'Pants', icon: '👖' },
+  { slot: 'BOOTS', label: 'Boots', icon: '👢' },
+  { slot: 'RING_1', label: 'Ring 1', icon: '💍' },
+  { slot: 'RING_2', label: 'Ring 2', icon: '💍' },
+  { slot: 'NECKLACE', label: 'Necklace', icon: '📿' },
+  { slot: 'TALISMAN', label: 'Talisman', icon: '🧿' },
 ];
 
 export default function PartyManager() {
-  const { heroes, selectedHeroClass, selectHero, unequipItem, templates, getHeroTotalStats } = useGameStore();
+  const {
+    heroes,
+    activeParty,
+    toggleDeployHero,
+    setPartyFormation,
+    selectedHeroClass,
+    selectHero,
+    templates,
+    getHeroTotalStats,
+    openEnhanceModal,
+    openSkillTreeModal,
+  } = useGameStore();
+
+  const [selectedSlotItem, setSelectedSlotItem] = useState<{ slot: ItemSlot; item: ItemInstance } | null>(null);
+  const [showAddHeroModal, setShowAddHeroModal] = useState<boolean>(false);
 
   const hero = heroes[selectedHeroClass];
   const totalStats = getHeroTotalStats(selectedHeroClass);
   const liveDPS = calculateTheoreticalDPS(totalStats);
 
+  const isCurrentHeroDeployed = activeParty.includes(selectedHeroClass);
+
+  // Total Party Combined DPS
+  const partyTotalDPS = activeParty.reduce((acc, hClass) => {
+    const stats = getHeroTotalStats(hClass);
+    return acc + calculateTheoreticalDPS(stats);
+  }, 0);
+
+  const handleSlotClick = (slot: ItemSlot, instance?: ItemInstance) => {
+    if (instance) {
+      setSelectedSlotItem({ slot, item: instance });
+    } else {
+      setSelectedSlotItem(null);
+    }
+  };
+
+  // Get list of heroes in reserve (not in active party)
+  const reserveHeroes = (Object.keys(CLASS_CONFIG) as HeroClass[]).filter(
+    (hClass) => !activeParty.includes(hClass)
+  );
+
   return (
     <div className="flex flex-col gap-3 p-3 text-xs overflow-y-auto flex-1 pb-16">
-      {/* 1. Hero Switcher Tabs */}
-      <div className="grid grid-cols-4 gap-1.5 bg-game-dark p-1 rounded-lg border border-game-border">
+      {/* 1. Party Formation & Squad Management Bar (3 Slots Max) */}
+      <div className="bg-game-card p-3.5 rounded-2xl border border-game-border flex flex-col gap-3 shadow-md">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 font-bold text-slate-100 text-xs">
+            <Users className="w-4 h-4 text-cyan-400" />
+            <span>ACTIVE BATTLE SQUAD ({activeParty.length}/3 Heroes)</span>
+          </div>
+
+          <div className="flex items-center gap-1 font-mono text-[11px] text-amber-400 font-bold">
+            <span>Squad DPS:</span>
+            <span>🔥 {partyTotalDPS.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* 3 Deployment Slots Grid */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {Array.from({ length: 3 }).map((_, idx) => {
+            const deployedClass = activeParty[idx];
+            if (deployedClass) {
+              const cfg = CLASS_CONFIG[deployedClass];
+              const isSelected = selectedHeroClass === deployedClass;
+
+              return (
+                <div
+                  key={deployedClass}
+                  className={`p-2.5 rounded-2xl border flex flex-col items-center justify-between gap-1.5 transition-all relative group ${
+                    isSelected
+                      ? 'bg-cyan-500/20 border-cyan-400 ring-2 ring-cyan-400/50 shadow-md scale-102'
+                      : 'bg-slate-900/90 border-slate-700/80 hover:border-slate-500'
+                  }`}
+                >
+                  {/* Remove Button (✕) */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDeployHero(deployedClass);
+                    }}
+                    className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white flex items-center justify-center transition-all z-10"
+                    title={`Remove ${cfg.name} from active party`}
+                  >
+                    <X size={11} />
+                  </button>
+
+                  {/* Slot Click to Select Hero */}
+                  <div
+                    onClick={() => selectHero(deployedClass)}
+                    className="w-full flex flex-col items-center cursor-pointer"
+                  >
+                    <span className="text-2xl mt-1">{cfg.icon}</span>
+                    <span className="text-[11px] font-bold text-slate-100 truncate w-full text-center mt-0.5">
+                      {cfg.name}
+                    </span>
+                    <span className="text-[9px] text-slate-400 truncate w-full text-center">
+                      {deployedClass === 'WARRIOR' ? 'Frontline' : deployedClass === 'PRIEST' ? 'Support' : 'Main DPS'}
+                    </span>
+                  </div>
+
+                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                    Slot {idx + 1}
+                  </span>
+                </div>
+              );
+            }
+
+            // Empty Slot with interactive Add button
+            return (
+              <button
+                key={`empty_${idx}`}
+                onClick={() => setShowAddHeroModal(true)}
+                className="p-3 rounded-2xl border border-dashed border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-900/30 hover:border-cyan-400 flex flex-col items-center justify-center gap-1 text-cyan-300 transition-all group active:scale-95"
+                title="Click to deploy a reserve hero to this slot"
+              >
+                <PlusCircle className="w-6 h-6 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-bold">+ Add Hero</span>
+                <span className="text-[8px] text-slate-500">Slot {idx + 1} (Empty)</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick Squad Formations */}
+        <div className="flex items-center justify-between border-t border-slate-800/80 pt-2 text-[10px]">
+          <span className="text-slate-400 font-semibold">Presets:</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setPartyFormation(['WARRIOR', 'RANGER', 'MAGE'])}
+              className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold transition"
+            >
+              Balanced (Warrior-Archer-Wizard)
+            </button>
+            <button
+              onClick={() => setPartyFormation(['WARRIOR', 'RANGER', 'PRIEST'])}
+              className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-semibold transition"
+            >
+              Sustain (Warrior-Archer-Priest)
+            </button>
+            <button
+              onClick={() => setPartyFormation(['WARRIOR'])}
+              className="px-2 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 font-semibold transition"
+            >
+              Solo Warrior
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Add Hero Modal / Drawer */}
+      {showAddHeroModal && (
+        <div className="bg-slate-900 border border-cyan-500/50 rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2.5 animate-scale-up">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center gap-2">
+              <PlusCircle className="w-4 h-4 text-cyan-400" />
+              <h4 className="font-bold text-xs text-white">Select Reserve Hero to Deploy (Max 3)</h4>
+            </div>
+            <button
+              onClick={() => setShowAddHeroModal(false)}
+              className="p-1 rounded-lg text-slate-400 hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {reserveHeroes.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {reserveHeroes.map((hClass) => {
+                const cfg = CLASS_CONFIG[hClass];
+                return (
+                  <button
+                    key={hClass}
+                    onClick={() => {
+                      toggleDeployHero(hClass);
+                      setShowAddHeroModal(false);
+                    }}
+                    className="p-2.5 rounded-xl border border-slate-700 hover:border-cyan-400 bg-slate-950/80 hover:bg-cyan-950/40 flex items-center gap-2.5 transition text-left"
+                  >
+                    <span className="text-2xl">{cfg.icon}</span>
+                    <div>
+                      <div className="font-bold text-xs text-slate-100">{cfg.name}</div>
+                      <div className="text-[9px] text-slate-400 truncate">{cfg.role}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-xs text-slate-400 py-2">
+              All 3 deployment slots are filled!
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* 2. Hero Switcher Tabs with Clean Status Badges */}
+      <div className="grid grid-cols-4 gap-1.5 bg-game-dark p-1 rounded-xl border border-game-border">
         {(Object.keys(CLASS_CONFIG) as HeroClass[]).map((classKey) => {
           const config = CLASS_CONFIG[classKey];
           const isSelected = selectedHeroClass === classKey;
+          const isDeployed = activeParty.includes(classKey);
 
           return (
             <button
               key={classKey}
-              onClick={() => selectHero(classKey)}
-              className={`flex flex-col items-center py-1.5 rounded-md transition-all ${
+              onClick={() => {
+                selectHero(classKey);
+                setSelectedSlotItem(null);
+              }}
+              className={`flex flex-col items-center py-2 px-1 rounded-xl transition-all relative ${
                 isSelected
-                  ? `bg-gradient-to-b ${config.color} text-white font-bold shadow-md scale-105`
+                  ? `bg-gradient-to-b ${config.color} text-white font-bold shadow-lg ring-1 ring-white/30 scale-102`
                   : 'text-slate-400 hover:text-slate-200 hover:bg-game-card'
               }`}
             >
-              <span className="text-base">{config.icon}</span>
-              <span className="text-[10px] mt-0.5">{config.name}</span>
+              {/* Deployed Dot */}
+              <div
+                className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${
+                  isDeployed ? 'bg-emerald-400 shadow-sm shadow-emerald-400 animate-pulse' : 'bg-slate-600'
+                }`}
+                title={isDeployed ? 'Deployed in Battle' : 'In Reserve'}
+              />
+
+              <span className="text-lg">{config.icon}</span>
+              <span className="text-[10px] mt-0.5 font-bold">{config.name}</span>
+              <span className={`text-[8px] mt-0.5 px-1.5 py-0.2 rounded-full ${isDeployed ? 'text-emerald-300 bg-emerald-950/90 font-bold' : 'text-slate-500 bg-slate-800'}`}>
+                {isDeployed ? 'Active' : 'Reserve'}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* 2. Hero Level & Live DPS Header */}
-      <div className="bg-game-card p-3 rounded-lg border border-game-border flex items-center justify-between shadow-sm">
+      {/* 3. Hero Level, Deployment Toggle & Live DPS Header */}
+      <div className="bg-game-card p-3 rounded-2xl border border-game-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-600 flex items-center justify-center text-xl shadow-inner">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-yellow-500 to-amber-600 flex items-center justify-center text-2xl shadow-inner">
             {CLASS_CONFIG[selectedHeroClass].icon}
           </div>
           <div>
             <div className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
-              <span>{hero.name}</span>
-              <span className="text-[10px] bg-yellow-400/20 text-yellow-400 px-1.5 py-0.2 rounded font-mono">
+              <span>{CLASS_CONFIG[selectedHeroClass].name}</span>
+              <span className="text-[10px] bg-yellow-400/20 text-yellow-400 px-1.5 py-0.5 rounded-full font-mono font-bold">
                 Lv.{hero.level}
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Class: {selectedHeroClass}</p>
+            <p className="text-[10px] text-slate-400">{CLASS_CONFIG[selectedHeroClass].role}</p>
           </div>
         </div>
 
-        <div className="text-right">
-          <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-            Sát Thương DPS
-          </div>
-          <div className="text-base font-bold font-mono text-yellow-400">
-            🔥 {liveDPS.toLocaleString()}
+        {/* Action Controls: Deploy / Remove Toggle & Skill Modal */}
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          {/* Active / Bench Toggle Button */}
+          <button
+            onClick={() => toggleDeployHero(selectedHeroClass)}
+            className={`px-3 py-1.5 rounded-xl text-[10px] font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 ${
+              isCurrentHeroDeployed
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/30 ring-1 ring-emerald-400/50'
+                : 'bg-gradient-to-r from-slate-800 to-slate-700 hover:from-blue-600 hover:to-indigo-600 text-slate-300 hover:text-white border border-slate-600 hover:border-blue-400'
+            }`}
+            title={isCurrentHeroDeployed ? 'Click to send this hero to reserve' : 'Click to deploy this hero to the battle squad'}
+          >
+            {isCurrentHeroDeployed ? <UserCheck size={13} className="text-white" /> : <PlusCircle size={13} />}
+            <span>{isCurrentHeroDeployed ? 'In Battle Squad (Bench)' : '+ Deploy to Squad'}</span>
+          </button>
+
+          <button
+            onClick={() => openSkillTreeModal()}
+            className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold text-[10px] hover:brightness-110 active:scale-95 transition flex items-center gap-1 shadow-md shadow-amber-500/20"
+          >
+            <Zap size={12} />
+            <span>Skills</span>
+          </button>
+
+          <div className="text-right pl-1 border-l border-slate-700/80">
+            <div className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">
+              DPS Rating
+            </div>
+            <div className="text-sm font-bold font-mono text-yellow-400">
+              🔥 {liveDPS.toLocaleString()}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 3. 10 Equipment Slots Grid */}
-      <div className="bg-game-card p-3 rounded-lg border border-game-border flex flex-col gap-2">
+      {/* 4. 10 Equipment Slots Grid */}
+      <div className="bg-game-card p-3 rounded-2xl border border-game-border flex flex-col gap-2">
         <h3 className="font-bold text-slate-200 text-xs flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-          <span>10 Ô Trang Bị & Phụ Kiện</span>
+          <span>10 Equipment & Accessory Slots ({CLASS_CONFIG[selectedHeroClass].name})</span>
         </h3>
 
         <div className="grid grid-cols-5 gap-2">
           {ALL_SLOTS.map((slotInfo) => {
             const instance = hero.equipment[slotInfo.slot];
             const template = instance ? templates[instance.templateId] : null;
+            const isSelected = selectedSlotItem?.slot === slotInfo.slot;
 
             return (
               <div
                 key={slotInfo.slot}
-                onClick={() => {
-                  if (instance) unequipItem(selectedHeroClass, slotInfo.slot);
-                }}
-                className={`relative aspect-square rounded-md border flex flex-col items-center justify-center p-1 cursor-pointer transition-all ${
+                onClick={() => handleSlotClick(slotInfo.slot, instance)}
+                className={`relative aspect-square rounded-xl border flex flex-col items-center justify-center p-1 cursor-pointer transition-all ${
                   instance
-                    ? 'bg-game-dark border-yellow-500/50 hover:border-yellow-400 hover:scale-105'
+                    ? isSelected
+                      ? 'bg-amber-500/20 border-amber-400 ring-2 ring-amber-400 scale-105 shadow-md shadow-amber-500/20'
+                      : 'bg-game-dark border-yellow-500/50 hover:border-yellow-400 hover:scale-105'
                     : 'bg-game-dark/50 border-game-border/60 border-dashed hover:border-slate-500'
                 }`}
-                title={instance ? `${template?.name} (+${instance.enhanceLevel})` : `Trống (${slotInfo.label})`}
+                title={instance ? `${template?.name} (+${instance.enhanceLevel})` : `Empty (${slotInfo.label})`}
               >
                 {instance ? (
                   <>
@@ -125,7 +371,9 @@ export default function PartyManager() {
                 ) : (
                   <>
                     <span className="text-sm opacity-30">{slotInfo.icon}</span>
-                    <span className="text-[8px] text-slate-500 mt-0.5">{slotInfo.label}</span>
+                    <span className="text-[7px] text-slate-500 truncate w-full text-center mt-0.5">
+                      {slotInfo.label}
+                    </span>
                   </>
                 )}
               </div>
@@ -134,54 +382,100 @@ export default function PartyManager() {
         </div>
       </div>
 
-      {/* 4. Streamlined Live Stat Sheet */}
-      <div className="bg-game-card p-3 rounded-lg border border-game-border flex flex-col gap-2">
+      {/* 5. Selected Slot Item Modal / Actions Drawer */}
+      {selectedSlotItem && (
+        <div className="bg-slate-900 border border-amber-500/50 rounded-2xl p-3 shadow-xl flex flex-col gap-2.5 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">
+                {templates[selectedSlotItem.item.templateId]?.icon || '📦'}
+              </span>
+              <div>
+                <h4 className="font-bold text-xs text-amber-300">
+                  {templates[selectedSlotItem.item.templateId]?.name || 'Equipment'}
+                  {selectedSlotItem.item.enhanceLevel > 0 && ` (+${selectedSlotItem.item.enhanceLevel})`}
+                </h4>
+                <span className="text-[9px] text-slate-400 font-mono">
+                  Rarity: {selectedSlotItem.item.rarity} • Slot: {selectedSlotItem.slot}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedSlotItem(null)}
+              className="p-1 rounded text-slate-400 hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button
+              onClick={() => {
+                openEnhanceModal(selectedSlotItem.item);
+                setSelectedSlotItem(null);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-[10px] flex items-center gap-1 transition"
+            >
+              <Hammer size={12} />
+              <span>Enhance Gear</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 6. Live Combat Attributes Matrix */}
+      <div className="bg-game-card p-3 rounded-2xl border border-game-border flex flex-col gap-2 shadow-sm">
         <h3 className="font-bold text-slate-200 text-xs flex items-center gap-1">
           <Zap className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Bảng Chỉ Số Chi Tiết (Live Stats)</span>
+          <span>Combat Attributes ({CLASS_CONFIG[selectedHeroClass].name})</span>
         </h3>
 
-        <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+        <div className="grid grid-cols-2 gap-2 text-slate-300 text-[11px] font-mono">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Sword className="w-3 h-3 text-red-400" /> ATK Vật Lý:
+              <Sword size={12} className="text-rose-400" /> Phys ATK:
             </span>
-            <span className="text-red-400 font-bold">{totalStats.physAtk}</span>
+            <span className="text-rose-400 font-bold">{totalStats.physAtk.toFixed(0)}</span>
           </div>
 
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-purple-400" /> ATK Phép:
+              <Sparkles size={12} className="text-purple-400" /> Magic ATK:
             </span>
-            <span className="text-purple-400 font-bold">{totalStats.magicAtk}</span>
+            <span className="text-purple-400 font-bold">{totalStats.magicAtk.toFixed(0)}</span>
           </div>
 
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Heart className="w-3 h-3 text-emerald-400" /> Máu Tối Đa:
+              <Heart size={12} className="text-emerald-400" /> Max HP:
             </span>
-            <span className="text-emerald-400 font-bold">{totalStats.maxHp}</span>
+            <span className="text-emerald-400 font-bold">{totalStats.maxHp.toFixed(0)}</span>
           </div>
 
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Shield className="w-3 h-3 text-blue-400" /> Giáp / DR:
+              <Shield size={12} className="text-cyan-400" /> Armor / DR:
             </span>
-            <span className="text-blue-400 font-bold">{totalStats.armor} ({totalStats.dmgReduction}%)</span>
+            <span className="text-cyan-400 font-bold">
+              {totalStats.armor.toFixed(0)} ({totalStats.dmgReduction.toFixed(0)}%)
+            </span>
           </div>
 
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Crosshair className="w-3 h-3 text-yellow-400" /> Chí Mạng:
+              <Crosshair size={12} className="text-amber-400" /> Crit / DMG:
             </span>
-            <span className="text-yellow-400 font-bold">{totalStats.critRate}% ({totalStats.critDmg}%)</span>
+            <span className="text-amber-400 font-bold">
+              {totalStats.critRate.toFixed(0)}% ({totalStats.critDmg.toFixed(0)}%)
+            </span>
           </div>
 
-          <div className="bg-game-dark p-2 rounded flex justify-between items-center border border-game-border/40">
+          <div className="flex justify-between bg-game-dark/80 p-2 rounded-xl border border-game-border/60">
             <span className="text-slate-400 flex items-center gap-1">
-              <Zap className="w-3 h-3 text-cyan-400" /> Tốc Đánh:
+              <Zap size={12} className="text-blue-400" /> ATK Speed:
             </span>
-            <span className="text-cyan-400 font-bold">{totalStats.atkSpeed.toFixed(2)}/s</span>
+            <span className="text-blue-400 font-bold">{totalStats.atkSpeed.toFixed(2)}/s</span>
           </div>
         </div>
       </div>

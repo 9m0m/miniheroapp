@@ -58,6 +58,8 @@ FE/yarn-debug.log*
 FE/yarn-error.log*
 FE/pnpm-debug.log*
 FE/lerna-debug.log*
+FE/*.tsbuildinfo
+FE/next-env.d.ts
 
 # Environment & Secrets (Never commit secrets!)
 .env
@@ -79,5 +81,10 @@ dump/
 # Internal Documentation & Plans
 plan.md
 GAME_DESIGN_DOCUMENT.md
+API_REFERENCE.md
 *.plan.md
+*.doc.md
+*.md
+!README.md
+
 

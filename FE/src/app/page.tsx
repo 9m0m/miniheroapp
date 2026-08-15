@@ -1,80 +1,67 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopHUD from '@/components/layout/TopHUD';
 import BottomNav, { TabType } from '@/components/layout/BottomNav';
 import BattleCanvas from '@/features/battle/BattleCanvas';
+import BattleDashboard from '@/features/battle/BattleDashboard';
 import PartyManager from '@/features/party/PartyManager';
 import CubeManager from '@/features/cube/CubeManager';
-import { FlaskConical, Anvil, Sparkles, Trophy } from 'lucide-react';
+import AlchemyManager from '@/features/alchemy/AlchemyManager';
+import BlacksmithManager from '@/features/blacksmith/BlacksmithManager';
+import { PiggyBankModal } from '@/components/modals/PiggyBankModal';
+import { AwakeningPassModal } from '@/components/modals/AwakeningPassModal';
+import { GrowthFundModal } from '@/components/modals/GrowthFundModal';
+import { MockWldPaymentSheet } from '@/components/modals/MockWldPaymentSheet';
+import { EnhanceModal } from '@/components/modals/EnhanceModal';
+import { SkillTreeModal } from '@/components/modals/SkillTreeModal';
+import { WorldMapModal } from '@/components/modals/WorldMapModal';
+import { BattleLogModal } from '@/components/modals/BattleLogModal';
+import { QuestsModal } from '@/components/modals/QuestsModal';
+import { TrialArenaModal } from '@/components/modals/TrialArenaModal';
+import { useGameStore } from '@/store/useGameStore';
 
 export default function GameMainPage() {
   const [activeTab, setActiveTab] = useState<TabType>('PARTY');
+  const { activeModal, closeModal, fetchInitialData } = useGameStore();
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   return (
-    <main className="flex flex-col h-screen w-full select-none bg-game-dark overflow-hidden">
-      {/* 1. Top HUD Bar (Currencies & Stage Progress) */}
-      <TopHUD />
+    <div className="flex justify-center min-h-screen bg-[#07090E]">
+      <main className="w-full max-w-md bg-game-dark border-x border-game-border flex flex-col h-screen relative shadow-2xl overflow-hidden select-none">
+        {/* 1. Top HUD Bar (Currencies, Stage Progress & Earning Hooks) */}
+        <TopHUD />
 
-      {/* 2. 2D Game Battle Canvas (Always Live 60FPS) */}
-      <BattleCanvas />
+        {/* 2. 2D Game Battle Canvas (Always Live 60FPS) */}
+        <BattleCanvas />
 
-      {/* 3. Dynamic Management View by Active Tab */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-game-dark">
-        {activeTab === 'BATTLE' && (
-          <div className="p-4 flex flex-col items-center justify-center gap-3 text-center flex-1 text-xs">
-            <div className="w-12 h-12 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-2xl">
-              ⚔️
-            </div>
-            <h3 className="font-bold text-sm text-slate-100">Chiến Trường Tự Động (Idle Auto-Battle)</h3>
-            <p className="text-slate-400 max-w-xs leading-relaxed">
-              Đội hình 3 Heroes đang tự động diệt 30 waves quái vật và Stage Boss trên sàn đấu phía trên.
-            </p>
-            <div className="bg-game-card p-3 rounded-lg border border-game-border w-full text-left space-y-1.5 mt-2">
-              <div className="flex justify-between text-slate-300">
-                <span>Trạng thái:</span>
-                <span className="text-emerald-400 font-bold">Đang Tự Động Chiến Đấu</span>
-              </div>
-              <div className="flex justify-between text-slate-300">
-                <span>Rớt đồ:</span>
-                <span className="text-yellow-400 font-mono">Gold + Đá + Rương</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 3. Dynamic Management View by Active Tab */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-game-dark">
+          {activeTab === 'BATTLE' && <BattleDashboard />}
+          {activeTab === 'PARTY' && <PartyManager />}
+          {activeTab === 'CUBE' && <CubeManager />}
+          {activeTab === 'ALCHEMY' && <AlchemyManager />}
+          {activeTab === 'BLACKSMITH' && <BlacksmithManager />}
+        </div>
 
-        {activeTab === 'PARTY' && <PartyManager />}
-        {activeTab === 'CUBE' && <CubeManager />}
+        {/* 4. Bottom Navigation Bar */}
+        <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
 
-        {activeTab === 'ALCHEMY' && (
-          <div className="p-4 flex flex-col items-center justify-center gap-3 text-center flex-1 text-xs">
-            <FlaskConical className="w-12 h-12 text-emerald-400 animate-bounce" />
-            <h3 className="font-bold text-sm text-slate-100">Phòng Giả Kim (Alchemy Lab)</h3>
-            <p className="text-slate-400 max-w-xs leading-relaxed">
-              Nấu Giấy Chúc Phúc (Blessing Scrolls), Thuốc Kháng Nguyên Tố 4 Hệ và Tiên Dược Vĩnh Viễn.
-            </p>
-            <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
-              Sẵn Sàng Cho Giai Đoạn 2 (P1)
-            </span>
-          </div>
-        )}
-
-        {activeTab === 'BLACKSMITH' && (
-          <div className="p-4 flex flex-col items-center justify-center gap-3 text-center flex-1 text-xs">
-            <Anvil className="w-12 h-12 text-amber-400" />
-            <h3 className="font-bold text-sm text-slate-100">Xưởng Thợ Rèn (Blacksmith Crafting)</h3>
-            <p className="text-slate-400 max-w-xs leading-relaxed">
-              Chế tạo 4 Ô Phụ Kiện (Nhẫn, Dây Chuyền, Bùa Chú) và Đục Lỗ Khảm Ngọc (Socketing).
-            </p>
-            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded">
-              Sẵn Sàng Cho Giai Đoạn 2 (P1)
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* 4. Bottom Navigation Bar */}
-      <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
-    </main>
+        {/* 5. Modals & Sheets */}
+        {activeModal === 'PIGGY_BANK' && <PiggyBankModal />}
+        {activeModal === 'AWAKENING_PASS' && <AwakeningPassModal />}
+        {activeModal === 'GROWTH_FUND' && <GrowthFundModal />}
+        {activeModal === 'MOCK_WLD_PAY' && <MockWldPaymentSheet />}
+        {activeModal === 'ENHANCE' && <EnhanceModal />}
+        {activeModal === 'SKILL_TREE' && <SkillTreeModal />}
+        {activeModal === 'WORLD_MAP' && <WorldMapModal />}
+        {activeModal === 'BATTLE_LOGS' && <BattleLogModal />}
+        <QuestsModal isOpen={activeModal === 'QUESTS'} onClose={closeModal} />
+        <TrialArenaModal isOpen={activeModal === 'TRIAL_ARENA'} onClose={closeModal} />
+      </main>
+    </div>
   );
 }

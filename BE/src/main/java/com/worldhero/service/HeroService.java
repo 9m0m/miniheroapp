@@ -1,0 +1,12 @@
+package com.worldhero.service;
+
+import com.worldhero.dto.HeroDetailDto;
+import com.worldhero.model.entity.HeroEntity;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface HeroService {
+    List<HeroDetailDto> getHeroesForUser(UUID userId);
+    HeroDetailDto buildHeroDetailDto(HeroEntity hero);
+}

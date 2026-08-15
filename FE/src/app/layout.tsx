@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "World Hero - Idle Party RPG",
-  description: "Trò chơi nhập vai nhàn rỗi 2D Pixel trên World App",
+  description: "2D Pixel Idle Party RPG on World App MiniKit",
 };
 
 export const viewport: Viewport = {
@@ -20,11 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body className="antialiased bg-game-dark text-slate-100 flex justify-center min-h-screen">
-        <div className="w-full max-w-md bg-game-dark border-x border-game-border flex flex-col min-h-screen relative shadow-2xl overflow-hidden">
-          {children}
-        </div>
+    <html lang="en">
+      <body className="antialiased bg-[#07090E] text-slate-100 min-h-screen">
+        {children}
       </body>
     </html>
   );
