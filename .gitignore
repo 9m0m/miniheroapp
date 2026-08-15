@@ -43,9 +43,10 @@ BE/.mvn/timing.properties
 BE/.mvn/wrapper/maven-wrapper.jar
 
 # ==========================================
-# Frontend (Node / React / Vite / TypeScript)
+# Frontend (Node / React / Vite / Next.js / TypeScript)
 # ==========================================
 FE/node_modules/
+FE/.next/
 FE/dist/
 FE/dist-ssr/
 FE/build/
