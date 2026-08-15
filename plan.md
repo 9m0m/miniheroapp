@@ -109,34 +109,57 @@ DPS hiển thị trên UI:
 
 ---
 
-## 📋 5. BẢNG CHECKLIST TÍNH NĂNG THEO GIAI ĐOẠN
+## 📋 5. BẢNG CHECKLIST TIẾN ĐỘ THEO GIAI ĐOẠN
 
-### 🟢 GIAI ĐOẠN 1 — CORE ENGINE + EARNING HOOKS (P0)
-- [ ] Khởi tạo Monorepo + Shared Types + Prisma Schema
-- [ ] Canvas 2D Battle Engine: 3 Heroes vs 30 Waves + Stage Boss
-- [ ] Auto-Advance / Auto-Repeat Loop (Idle không timer)
-- [ ] Season Progress Bar, Daily Quests, Login Streak, First Clear Bonus
-- [ ] Giao diện 10 Ô Đồ × 3 Heroes (4 Class: Warrior, Ranger, Mage, Priest)
+### 🟢 GIAI ĐOẠN 1 — CORE ENGINE, PARTY SYSTEM & DATA PERSISTENCE (P0 - ĐANG TRIỂN KHAI)
+- [x] Khởi tạo Repository Git (`main` & `dev`), cấu hình `.gitignore` chuẩn.
+- [x] **Backend Skeleton:** Java 21, Spring Boot 3.3.4, Maven, Swagger OpenAPI, CORS.
+- [x] **Game Math Engine:** `DamageCalculator` (DPH, Asymptotic Armor, Caps), `StatEvaluator`, `CubeEngine`.
+- [x] **Frontend Skeleton:** Next.js 15 (App Router), TypeScript, Tailwind CSS, Lucide Icons, Zustand Store.
+- [x] **Canvas 2D Battle Engine:** Render 3 Heroes vs Monster, thanh máu, 60FPS loop, Floating Damage text.
+- [x] **Giao diện 10 Ô Trang Bị:** Chuyển đổi 4 Class, bảng chỉ số Live DPS, hiển thị đồ theo phẩm cấp.
+- [ ] **Backend Database JPA & PostgreSQL Schema:**
+  - [ ] Entity `User` (Gold, Gems, Stones, World/Stage/Wave progress, World ID nullifier hash).
+  - [ ] Entity `Hero` (User ID, Class, Level, Exp, Skill Points).
+  - [ ] Entity `ItemTemplate` (Master Data do Admin chỉnh sửa, Cache trong Redis).
+  - [ ] Entity `ItemInstance` (Túi đồ người chơi, gắn vào Hero slot).
+- [ ] **Backend REST APIs & FE Integration:**
+  - [ ] API lấy thông tin User & Party 3 Heroes (`GET /api/v1/heroes`).
+  - [ ] API trang bị / tháo đồ (`POST /api/v1/inventory/equip`, `POST /api/v1/inventory/unequip`).
+  - [ ] API lưu tiến trình 30 Waves & phần thưởng (`POST /api/v1/battle/advance-wave`).
+- [ ] **Earning Hooks & Retention UI:**
+  - [x] Season Progress Bar + Countdown Timer (18 days).
+  - [ ] Hệ thống Daily Quests (4 nhiệm vụ/ngày).
+  - [ ] Chuỗi Đăng Nhập 7 Ngày (Login Streak Rewards).
 
-### 🟡 GIAI ĐOẠN 2 — UPGRADE ECOSYSTEM (P1)
-- [ ] Cường hóa +1 ➔ +15
-- [ ] The Cube: Ghép xác định, Reforge, Ghép Ngọc Tier
-- [ ] Khảm Ngọc 5 loại (Tier 1 ➔ 5) + Blessing Scrolls
-- [ ] Alchemy Lab + Blacksmith Crafting
+---
 
-### 🟠 GIAI ĐOẠN 3 — SKILL TREE & 4 WORLDS (P2)
-- [ ] Cây Kỹ Năng tiêu Gold riêng mỗi Class
-- [ ] 40 Stages + 4 World + Đá Phong Ấn
+### 🟡 GIAI ĐOẠN 2 — UPGRADE ECOSYSTEM & CRAFTING (P1)
+- [ ] Cường hóa trang bị $+1 \rightarrow +15$ (Tiêu Gold + Đá Cường Hóa).
+- [x] Giao diện The Cube UI (Smart Fusion, Gem Fusion, Reforge).
+- [ ] Backend API The Cube: Ghép 3 món cùng phẩm lên phẩm trên, Ghép ngọc Tier, Reforge khóa dòng.
+- [ ] Khảm Ngọc (1-3 Sockets) & Ép Giấy Chúc Phúc (Blessing Scrolls).
+- [ ] Lò Giả Kim (Nấu giấy phù phép & dược phẩm) + Xưởng Thợ Rèn (Rèn 4 Phụ Kiện).
 
-### 🔴 GIAI ĐOẠN 4 — ADMIN PANEL (P3)
-- [ ] Admin Dashboard: Item Templates, Quái/Boss Config, User Audit
-- [ ] Template-Instance auto-recalculate + Migration Engine
+---
 
-### 🟣 GIAI ĐOẠN 5 — WORLD ID + DEPLOY (P4)
-- [ ] World ID Verification (MiniKit SDK) + Cloud Save
-- [ ] MiniKit Pay: Skin, Pet, Mở rộng túi đồ
-- [ ] Submit to World Developer Portal for Review
-- [ ] Production Deploy trên World Chain
+### 🟠 GIAI ĐOẠN 3 — SKILL TREE & TIẾN TRÌNH 4 THẾ GIỚI (P2)
+- [ ] Cây Kỹ Năng tiêu Gold riêng cho 4 Class.
+- [ ] 40 Stages qua 4 Thế Giới (Rừng, Băng, Lửa, Hư Không) + Hệ thống Đá Phong Ấn mở Boss X-10.
+- [ ] Lưu kỷ lục Speedrun vượt ải nhanh nhất (Redis Sorted Sets `ZADD`).
+
+---
+
+### 🔴 GIAI ĐOẠN 4 — ADMIN DASHBOARD & CÂN BẰNG ĐỘNG (P3)
+- [ ] Admin Dashboard UI (Quản lý Item Templates, chỉ số Quái/Boss, Drop rates).
+- [ ] Cơ chế Hot-reload Redis cache khi Admin sửa template (Stats tự động tính lại tức thì).
+
+---
+
+### 🟣 GIAI ĐOẠN 5 — WORLD ID, MINIKIT PAY & DEPLOY (P4)
+- [ ] Tích hợp World ID Verification (`nullifier_hash`) qua MiniKit SDK.
+- [ ] Tích hợp MiniKit Pay (Thanh toán WLD/USDC mua Skin, Pet nhặt đồ, Mở rộng túi).
+- [ ] Submit duyệt trên World Developer Portal & Deploy Production.
 
 ---
 
