@@ -1,0 +1,76 @@
+# ==========================================
+# Root .gitignore for World Hero MiniApp
+# Covers: Java (Spring Boot) + React (Node/Vite) + IDEs
+# ==========================================
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# IDEs & Editors
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ==========================================
+# Backend (Java / Spring Boot / Maven / Gradle)
+# ==========================================
+BE/target/
+BE/build/
+BE/.gradle/
+BE/out/
+BE/*.jar
+BE/*.war
+BE/*.nar
+BE/*.ear
+BE/*.class
+BE/hs_err_pid*
+BE/replay_pid*
+BE/.mvn/timing.properties
+BE/.mvn/wrapper/maven-wrapper.jar
+
+# ==========================================
+# Frontend (Node / React / Vite / TypeScript)
+# ==========================================
+FE/node_modules/
+FE/dist/
+FE/dist-ssr/
+FE/build/
+FE/.pnpm-store/
+FE/.yarn/
+FE/*.log
+FE/npm-debug.log*
+FE/yarn-debug.log*
+FE/yarn-error.log*
+FE/pnpm-debug.log*
+FE/lerna-debug.log*
+
+# Environment & Secrets (Never commit secrets!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+BE/src/main/resources/application-secret.yml
+BE/src/main/resources/application-secret.properties
+
+# Database & Scratch
+*.sqlite
+*.sqlite3
+*.db
+scratch/
+dump/
+*.dump
