@@ -75,3 +75,9 @@ BE/src/main/resources/application-secret.properties
 scratch/
 dump/
 *.dump
+
+# Internal Documentation & Plans
+plan.md
+GAME_DESIGN_DOCUMENT.md
+*.plan.md
+
