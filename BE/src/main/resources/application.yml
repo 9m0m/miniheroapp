@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: world-hero-backend
+  profiles:
+    active: dev
+  main:
+    banner-mode: console
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
