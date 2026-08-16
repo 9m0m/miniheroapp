@@ -14,4 +14,7 @@ public interface ItemTemplateRepository extends JpaRepository<ItemTemplateEntity
     List<ItemTemplateEntity> findByRequiredClassOrRequiredClassIsNull(HeroClass requiredClass);
 
     List<ItemTemplateEntity> findBySlotType(ItemSlot slotType);
+
+    List<ItemTemplateEntity> findByBaseRarity(com.worldhero.model.enums.ItemRarity baseRarity);
+
 }

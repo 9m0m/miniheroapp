@@ -32,6 +32,8 @@ public class TrialArenaServiceImpl implements TrialArenaService {
     private final TrialRecordRepository trialRecordRepository;
     private final UserService userService;
     private final QuestService questService;
+    private final com.worldhero.service.HeroService heroService;
+    private final com.worldhero.repository.HeroRepository heroRepository;
 
     private String getWeeklyKey() {
         LocalDate now = LocalDate.now(ZoneOffset.UTC);
@@ -47,7 +49,31 @@ public class TrialArenaServiceImpl implements TrialArenaService {
         UserEntity user = userService.getUserOrThrow(request.getUserId());
         String weeklyKey = getWeeklyKey();
 
-        double currentScore = request.getTrialType() == TrialType.DPS_30S ? request.getDpsPeak() : request.getTimeTakenSec();
+        // 🛡️ ANTI-CHEAT: Calculate Server-Side Theoretical DPS Ceiling based on user's actual gear
+        double serverMaxDps = computeUserMaxPossibleDps(user);
+        double submittedDpsPeak = Math.max(0.0, request.getDpsPeak());
+        double submittedTotalDmg = Math.max(0.0, request.getTotalDamage());
+        double submittedTime = request.getTimeTakenSec() > 0 ? request.getTimeTakenSec() : 30.0;
+
+        if (request.getTrialType() == TrialType.DPS_30S) {
+            // Maximum reasonable burst DPS is 2.5x continuous theoretical DPS (crit streaks + active skills)
+            double allowedPeakCeiling = Math.max(50.0, serverMaxDps * 2.5);
+            if (submittedDpsPeak > allowedPeakCeiling) {
+                log.warn("🚨 [ANTI-CHEAT FLAG] User {} submitted impossible DPS peak {} (Theoretical Max: {}, Allowed Ceiling: {}). Clamping to ceiling.",
+                        user.getId(), submittedDpsPeak, serverMaxDps, allowedPeakCeiling);
+                submittedDpsPeak = allowedPeakCeiling;
+                submittedTotalDmg = Math.min(submittedTotalDmg, allowedPeakCeiling * 30.0);
+            }
+        } else if (request.getTrialType() == TrialType.BOSS_SPEEDRUN) {
+            // Speedrun sanity check: minimum realistic kill time is 2.0 seconds
+            if (submittedTime < 2.0) {
+                log.warn("🚨 [ANTI-CHEAT FLAG] User {} submitted impossible Boss Speedrun time {}s. Clamping to 2.5s.",
+                        user.getId(), submittedTime);
+                submittedTime = 2.5;
+            }
+        }
+
+        double currentScore = request.getTrialType() == TrialType.DPS_30S ? submittedDpsPeak : submittedTime;
 
         TrialRecordEntity record = trialRecordRepository
                 .findByUserIdAndTrialTypeAndPeriodKey(user.getId(), request.getTrialType(), weeklyKey)
@@ -63,8 +89,8 @@ public class TrialArenaServiceImpl implements TrialArenaService {
         if (request.getTrialType() == TrialType.DPS_30S) {
             if (currentScore > record.getScore()) {
                 record.setScore(currentScore);
-                record.setDpsPeak(request.getDpsPeak());
-                record.setTotalDamage(request.getTotalDamage());
+                record.setDpsPeak(submittedDpsPeak);
+                record.setTotalDamage(submittedTotalDmg);
                 record.setTimeTakenSec(30.0);
                 record.setHeroesSnapshotJson(request.getHeroesSnapshotJson());
                 record.setRecordedAt(Instant.now());
@@ -74,9 +100,9 @@ public class TrialArenaServiceImpl implements TrialArenaService {
             // Speedrun: lower time is better
             if (currentScore < record.getScore() && currentScore > 0.0) {
                 record.setScore(currentScore);
-                record.setTimeTakenSec(request.getTimeTakenSec());
-                record.setDpsPeak(request.getDpsPeak());
-                record.setTotalDamage(request.getTotalDamage());
+                record.setTimeTakenSec(submittedTime);
+                record.setDpsPeak(submittedDpsPeak);
+                record.setTotalDamage(submittedTotalDmg);
                 record.setHeroesSnapshotJson(request.getHeroesSnapshotJson());
                 record.setRecordedAt(Instant.now());
                 isNewBest = true;
@@ -97,6 +123,27 @@ public class TrialArenaServiceImpl implements TrialArenaService {
 
         return toLeaderboardDto(record, 0);
     }
+
+    private double computeUserMaxPossibleDps(UserEntity user) {
+        List<com.worldhero.model.entity.HeroEntity> heroes = heroRepository.findByUserId(user.getId());
+        if (heroes.isEmpty()) return 100.0;
+
+        List<com.worldhero.model.entity.HeroEntity> partyHeroes = heroes.stream()
+                .filter(com.worldhero.model.entity.HeroEntity::isInParty)
+                .toList();
+
+        if (partyHeroes.isEmpty()) {
+            partyHeroes = heroes.stream().limit(3).toList();
+        }
+
+        double totalDps = 0.0;
+        for (var hero : partyHeroes) {
+            var detail = heroService.buildHeroDetailDto(hero);
+            totalDps += Math.max(10.0, detail.getLiveDps());
+        }
+        return totalDps;
+    }
+
 
     @Override
     @Transactional(readOnly = true)

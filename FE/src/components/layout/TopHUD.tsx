@@ -11,13 +11,6 @@ const WORLD_NAMES: Record<number, string> = {
   4: 'Void Abyss',
 };
 
-const WORLD_ICONS: Record<number, string> = {
-  1: '🌲',
-  2: '❄️',
-  3: '🔥',
-  4: '🪐',
-};
-
 export default function TopHUD() {
   const {
     gold,
@@ -56,9 +49,9 @@ export default function TopHUD() {
         {/* Piggy Bank Quick Button */}
         <button
           onClick={() => openModal('PIGGY_BANK')}
-          className="flex items-center gap-1 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/40 text-amber-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-sm hover:brightness-110 active:scale-95 transition"
+          className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/15 to-yellow-500/15 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm hover:brightness-110 active:scale-95 transition"
         >
-          <span>🐷</span>
+          <span className="text-[10px] uppercase font-bold text-amber-400">Vault:</span>
           <span className="font-mono">{piggyBankGems}</span>
         </button>
       </div>
@@ -71,12 +64,12 @@ export default function TopHUD() {
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/80 text-slate-100 font-bold text-xs hover:border-cyan-400/60 transition group"
           title="View 4 Worlds Map"
         >
-          <span>{WORLD_ICONS[worldIndex] || '🌲'}</span>
+          <Map size={13} className="text-cyan-400" />
           <span className="text-cyan-300 group-hover:text-cyan-200">
             Stage {worldIndex}-{stageIndex}
           </span>
           <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
-            ({WORLD_NAMES[worldIndex]})
+            • {WORLD_NAMES[worldIndex]}
           </span>
         </button>
 
@@ -134,7 +127,7 @@ export default function TopHUD() {
         </div>
       </div>
 
-      {/* 3. Sleek Integrated Wave Progression Track */}
+      {/* 3. Minimalist & Clean Wave Progression Track */}
       <div className="flex flex-col gap-1 pt-0.5">
         <div className="flex items-center justify-between text-[10px] font-mono px-0.5">
           <span className="text-slate-400 font-sans font-semibold flex items-center gap-1">
@@ -144,7 +137,7 @@ export default function TopHUD() {
 
           {isBossWave ? (
             <span className="text-red-400 font-bold flex items-center gap-1 animate-pulse">
-              <span>👑 STAGE BOSS (WAVE 31)</span>
+              <span>STAGE BOSS (WAVE 31)</span>
             </span>
           ) : (
             <span className="text-slate-300 font-bold">
@@ -153,8 +146,8 @@ export default function TopHUD() {
           )}
         </div>
 
-        {/* Multi-segment Milestone Progress Bar */}
-        <div className="relative w-full bg-slate-900/90 h-2.5 rounded-full overflow-hidden border border-slate-700/80 p-[1px] shadow-inner">
+        {/* Clean, Non-cluttered Progress Bar */}
+        <div className="relative w-full bg-slate-900/90 h-2 rounded-full overflow-hidden border border-slate-700/70 p-[1px] shadow-inner">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
               isBossWave
@@ -163,15 +156,6 @@ export default function TopHUD() {
             }`}
             style={{ width: `${waveProgressPercent}%` }}
           />
-
-          {/* Milestone markers at Wave 10, Wave 20, Wave 30, Wave 31 Boss */}
-          <div className="absolute inset-0 flex justify-between px-1 pointer-events-none items-center text-[7px] text-slate-500 font-mono">
-            <span className="opacity-0">1</span>
-            <span className="opacity-60">| 10</span>
-            <span className="opacity-60">| 20</span>
-            <span className="opacity-60">| 30</span>
-            <span className="text-[9px] text-amber-400 leading-none">👑 31</span>
-          </div>
         </div>
       </div>
     </header>

@@ -8,18 +8,16 @@ import com.worldhero.model.entity.ItemTemplateEntity;
 import com.worldhero.model.entity.UserEntity;
 import com.worldhero.repository.DropTableConfigRepository;
 import com.worldhero.repository.ItemInstanceRepository;
-import com.worldhero.repository.ItemTemplateRepository;
 import com.worldhero.repository.UserRepository;
 import com.worldhero.service.BattleService;
+import com.worldhero.service.ItemTemplateCacheService;
 import com.worldhero.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,21 +27,29 @@ public class BattleServiceImpl implements BattleService {
     public static final int PIGGY_BANK_CAP = 1000;
 
     private final UserRepository userRepository;
-    private final ItemTemplateRepository templateRepository;
     private final ItemInstanceRepository instanceRepository;
     private final DropTableConfigRepository dropTableConfigRepository;
     private final UserService userService;
     private final com.worldhero.service.QuestService questService;
+    private final ItemTemplateCacheService itemTemplateCacheService;
 
     @Override
     @Transactional
     public WaveClearResponseDto processWaveClear(WaveClearRequestDto request) {
         UserEntity user = userService.getUserOrThrow(request.getUserId());
 
-        int world = Math.max(1, request.getWorld() > 0 ? request.getWorld() : user.getCurrentWorld());
-        int stage = Math.max(1, request.getStage() > 0 ? request.getStage() : user.getCurrentStage());
-        int wave = Math.max(1, request.getWave() > 0 ? request.getWave() : user.getCurrentWave());
-        boolean isBoss = request.isBossWave() || wave == 31;
+        // 0. Server-Authoritative State Check: Always rely on server state to prevent client spoofing
+        int world = Math.max(1, user.getCurrentWorld());
+        int stage = Math.max(1, user.getCurrentStage());
+        int wave = Math.max(1, user.getCurrentWave());
+        boolean isBoss = wave == 31;
+
+        if (request.getWorld() > 0 && request.getStage() > 0 && request.getWave() > 0) {
+            if (request.getWorld() != world || request.getStage() != stage || request.getWave() != wave) {
+                log.warn("⚠️ Client Desync Detected for User {}: Client sent [W{} S{} Wave{}] but Server is [W{} S{} Wave{}]. Enforcing Server State.",
+                        user.getId(), request.getWorld(), request.getStage(), request.getWave(), world, stage, wave);
+            }
+        }
 
         // Fetch Live Drop Config from Database (with fallback defaults)
         var dropConfig = dropTableConfigRepository.findByWorldIndexAndStageIndex(world, stage).orElse(null);
@@ -77,7 +83,7 @@ public class BattleServiceImpl implements BattleService {
             double legendaryW = isBoss ? (dropConfig != null ? dropConfig.getBossLegendaryWeight() : 0.05) : (dropConfig != null ? dropConfig.getNormalLegendaryWeight() : 0.00);
 
             double roll = ThreadLocalRandom.current().nextDouble();
-            com.worldhero.model.enums.ItemRarity targetRarity = com.worldhero.model.enums.ItemRarity.COMMON;
+            com.worldhero.model.enums.ItemRarity targetRarity;
             double cumulative = 0.0;
             if ((cumulative += legendaryW) >= roll) {
                 targetRarity = com.worldhero.model.enums.ItemRarity.LEGENDARY;
@@ -91,17 +97,10 @@ public class BattleServiceImpl implements BattleService {
                 targetRarity = com.worldhero.model.enums.ItemRarity.COMMON;
             }
 
-            final com.worldhero.model.enums.ItemRarity selectedRarity = targetRarity;
-            List<ItemTemplateEntity> matchingTemplates = templateRepository.findAll().stream()
-                    .filter(t -> t.getBaseRarity() == selectedRarity)
-                    .collect(Collectors.toList());
+            // Fetch template in O(1) from in-memory cache
+            ItemTemplateEntity randomTemplate = itemTemplateCacheService.getRandomTemplateByRarity(targetRarity);
 
-            if (matchingTemplates.isEmpty()) {
-                matchingTemplates = templateRepository.findAll();
-            }
-
-            if (!matchingTemplates.isEmpty()) {
-                ItemTemplateEntity randomTemplate = matchingTemplates.get(ThreadLocalRandom.current().nextInt(matchingTemplates.size()));
+            if (randomTemplate != null) {
                 int calculatedILvl = Math.max(1, (world - 1) * 10 + stage);
 
                 ItemInstanceEntity droppedInstance = ItemInstanceEntity.builder()
@@ -122,6 +121,7 @@ public class BattleServiceImpl implements BattleService {
                         user.getId(), randomTemplate.getBaseRarity(), randomTemplate.getName(), calculatedILvl);
             }
         }
+
 
         // 4. Update Progression: Waves 1..30 are normal mob waves, Wave 31 is the Stage Boss
         int nextWave = wave;

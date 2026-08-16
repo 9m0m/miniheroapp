@@ -35,8 +35,9 @@ public class QuestServiceImpl implements QuestService {
     private final UserMilestoneClaimRepository userMilestoneClaimRepository;
     private final UserRepository userRepository;
     private final UserService userService;
-    private final ItemTemplateRepository itemTemplateRepository;
     private final ItemInstanceRepository itemInstanceRepository;
+    private final com.worldhero.service.ItemTemplateCacheService itemTemplateCacheService;
+
 
     private String getDailyKey() {
         return DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now(ZoneOffset.UTC));
@@ -240,13 +241,8 @@ public class QuestServiceImpl implements QuestService {
     }
 
     private void spawnRewardItem(UserEntity user, ItemRarity rarity) {
-        List<ItemTemplateEntity> templates = itemTemplateRepository.findAll().stream()
-                .filter(t -> t.getBaseRarity() == rarity)
-                .collect(Collectors.toList());
-
-        if (templates.isEmpty()) templates = itemTemplateRepository.findAll();
-        if (!templates.isEmpty()) {
-            ItemTemplateEntity tmpl = templates.get(ThreadLocalRandom.current().nextInt(templates.size()));
+        ItemTemplateEntity tmpl = itemTemplateCacheService.getRandomTemplateByRarity(rarity);
+        if (tmpl != null) {
             int ilvl = Math.max(1, (user.getCurrentWorld() - 1) * 10 + user.getCurrentStage());
             ItemInstanceEntity item = ItemInstanceEntity.builder()
                     .user(user)
@@ -261,6 +257,7 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
+
     @Override
     @Transactional
     public void recordQuestAction(UUID userId, QuestActionType actionType, int amount) {
@@ -269,21 +266,42 @@ public class QuestServiceImpl implements QuestService {
         String weeklyKey = getWeeklyKey();
 
         List<QuestTemplateEntity> templates = questTemplateRepository.findByActionTypeAndIsActiveTrue(actionType);
+        if (templates.isEmpty()) return;
+
+        UserEntity user = null;
         for (QuestTemplateEntity t : templates) {
             String periodKey = t.getQuestType() == QuestType.DAILY ? dailyKey : weeklyKey;
-            userQuestProgressRepository.findByUserIdAndQuestTemplateIdAndPeriodKey(userId, t.getId(), periodKey)
-                    .ifPresent(p -> {
-                        if (!p.isCompleted()) {
-                            int newCount = p.getCurrentCount() + amount;
-                            p.setCurrentCount(newCount);
-                            if (newCount >= t.getTargetCount()) {
-                                p.setCompleted(true);
-                            }
-                            userQuestProgressRepository.save(p);
-                        }
-                    });
+            var opt = userQuestProgressRepository.findByUserIdAndQuestTemplateIdAndPeriodKey(userId, t.getId(), periodKey);
+            UserQuestProgressEntity p;
+            if (opt.isPresent()) {
+                p = opt.get();
+            } else {
+                if (user == null) {
+                    user = userRepository.findById(userId).orElse(null);
+                    if (user == null) return;
+                }
+                p = UserQuestProgressEntity.builder()
+                        .user(user)
+                        .questTemplate(t)
+                        .questType(t.getQuestType())
+                        .periodKey(periodKey)
+                        .currentCount(0)
+                        .isCompleted(false)
+                        .isClaimed(false)
+                        .build();
+            }
+
+            if (!p.isCompleted()) {
+                int newCount = p.getCurrentCount() + amount;
+                p.setCurrentCount(newCount);
+                if (newCount >= t.getTargetCount()) {
+                    p.setCompleted(true);
+                }
+                userQuestProgressRepository.save(p);
+            }
         }
     }
+
 
     // ==========================================
     // 🛠️ ADMIN APIS

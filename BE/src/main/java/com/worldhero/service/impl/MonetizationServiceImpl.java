@@ -13,7 +13,6 @@ import com.worldhero.model.entity.ItemTemplateEntity;
 import com.worldhero.model.entity.UserEntity;
 import com.worldhero.model.enums.ItemRarity;
 import com.worldhero.repository.ItemInstanceRepository;
-import com.worldhero.repository.ItemTemplateRepository;
 import com.worldhero.repository.UserRepository;
 import com.worldhero.service.MonetizationService;
 import com.worldhero.service.UserService;
@@ -36,9 +35,10 @@ public class MonetizationServiceImpl implements MonetizationService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final UserRepository userRepository;
-    private final ItemTemplateRepository templateRepository;
     private final ItemInstanceRepository instanceRepository;
     private final UserService userService;
+    private final com.worldhero.service.ItemTemplateCacheService itemTemplateCacheService;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -187,12 +187,9 @@ public class MonetizationServiceImpl implements MonetizationService {
     }
 
     private void grantEpicGuaranteedChest(UserEntity user) {
-        List<ItemTemplateEntity> epicTemplates = templateRepository.findAll().stream()
-                .filter(t -> t.getBaseRarity() == ItemRarity.EPIC)
-                .toList();
+        ItemTemplateEntity tmpl = itemTemplateCacheService.getRandomTemplateByRarity(ItemRarity.EPIC);
 
-        if (!epicTemplates.isEmpty()) {
-            ItemTemplateEntity tmpl = epicTemplates.get(0);
+        if (tmpl != null) {
             ItemInstanceEntity item = ItemInstanceEntity.builder()
                     .user(user)
                     .template(tmpl)
@@ -206,6 +203,7 @@ public class MonetizationServiceImpl implements MonetizationService {
             log.info("🎁 Day 7 Grand Prize: Granted Epic {} to user {}", tmpl.getName(), user.getId());
         }
     }
+
 
     private List<Integer> parseClaimedStages(String json) {
         if (json == null || json.isBlank() || json.equals("[]")) {

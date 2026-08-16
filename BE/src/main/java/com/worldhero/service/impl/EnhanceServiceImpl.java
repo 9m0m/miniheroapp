@@ -59,14 +59,16 @@ public class EnhanceServiceImpl implements EnhanceService {
             stonesCost = 1;
             successChance = 100.0;
         } else if (currentLvl < 10) {
-            goldCost = 500L * (currentLvl + 1);
+            goldCost = 600L * (currentLvl + 1);
             stonesCost = 2;
-            successChance = Math.max(50.0, 85.0 - (currentLvl - 5) * 7.0);
+            successChance = Math.max(45.0, 85.0 - (currentLvl - 5) * 8.0);
         } else {
-            goldCost = 1000L * (currentLvl + 1);
-            stonesCost = 3;
-            successChance = Math.max(20.0, 40.0 - (currentLvl - 10) * 5.0);
+            // Level +10 to +15: Exponential gold sink to prevent hyperinflation
+            goldCost = 2000L * (long) Math.pow(1.35, currentLvl - 9);
+            stonesCost = Math.min(5, 3 + (currentLvl - 10) / 2);
+            successChance = Math.max(20.0, 45.0 - (currentLvl - 10) * 5.0);
         }
+
 
         // Validate Balances
         if (user.getGold() < goldCost) {
