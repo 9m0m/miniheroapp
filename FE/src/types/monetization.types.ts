@@ -1,14 +1,16 @@
 export type ActiveModal = 
   | 'PIGGY_BANK' 
   | 'AWAKENING_PASS' 
-  | 'GROWTH_FUND' 
   | 'MOCK_WLD_PAY' 
   | 'ENHANCE' 
   | 'SKILL_TREE' 
-  | 'WORLD_MAP' 
-  | 'BATTLE_LOGS' 
   | 'QUESTS'
   | 'TRIAL_ARENA'
+  | 'CORE_PARTY_FORMATION'
+  | 'CHEST_REWARD'
+  | 'CHEST_VAULT'
+  | 'RECRUITMENT'
+  | 'EXPEDITION'
   | null;
 
 export interface MockPaymentConfig {
@@ -26,7 +28,4 @@ export interface MonetizationStatus {
   loginDayIndex: number;
   loginLastClaimedAt: string | null;
   canClaimToday: boolean;
-  growthFundUnlocked: boolean;
-  claimedGrowthFundStages: number[];
-  maxClearedStage: number;
 }

@@ -1,11 +1,13 @@
 package com.worldhero.controller;
 
+import com.worldhero.config.security.UserPrincipal;
 import com.worldhero.dto.UserProfileDto;
 import com.worldhero.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,7 +22,13 @@ public class UserController {
 
     @GetMapping("/profile")
     @Operation(summary = "Lấy hồ sơ người dùng, số dư ví và trạng thái Earning")
-    public ResponseEntity<UserProfileDto> getProfile(@RequestParam(required = false) UUID userId) {
+    public ResponseEntity<UserProfileDto> getProfile(
+            @RequestParam(required = false) UUID userId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        if (principal != null && principal.getId() != null) {
+            return ResponseEntity.ok(userService.getProfile(principal.getId()));
+        }
         if (userId != null) {
             return ResponseEntity.ok(userService.getProfile(userId));
         }

@@ -1,7 +1,15 @@
 import { apiClient } from './client';
-import { ItemInstance, ItemSlot } from '../types/game.types';
+import { ItemInstance, ItemSlot, ItemTemplate } from '../types/game.types';
 
 export const inventoryApi = {
+  /**
+   * Lấy danh sách toàn bộ Item Templates chuẩn từ Database Backend.
+   */
+  getItemTemplates: async (): Promise<ItemTemplate[]> => {
+    const res = await apiClient.get<ItemTemplate[]>('/item-templates');
+    return res.data;
+  },
+
   /**
    * Lấy danh sách toàn bộ vật phẩm đang nằm trong túi đồ người chơi.
    */
@@ -37,6 +45,27 @@ export const inventoryApi = {
     const res = await apiClient.post('/inventory/unequip', {
       userId,
       itemInstanceId,
+    });
+    return res.data;
+  },
+
+  /**
+   * Mở rương vật phẩm từ server (Authoritative loot drops).
+   */
+  openChest: async (userId: string, chestItemInstanceId: string): Promise<any> => {
+    const res = await apiClient.post('/inventory/open-chest', {
+      userId,
+      chestItemInstanceId,
+    });
+    return res.data;
+  },
+
+  /**
+   * Mở rộng số ô túi đồ của người chơi và lưu vào database.
+   */
+  unlockSlots: async (userId: string, targetSlots: number): Promise<number> => {
+    const res = await apiClient.post<number>('/inventory/unlock-slots', null, {
+      params: { userId, targetSlots },
     });
     return res.data;
   },

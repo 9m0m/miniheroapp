@@ -1,5 +1,6 @@
 package com.worldhero.controller;
 
+import com.worldhero.config.security.UserPrincipal;
 import com.worldhero.dto.HeroDetailDto;
 import com.worldhero.dto.HeroSkillTreeDto;
 import com.worldhero.dto.UpgradeSkillRequestDto;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -29,7 +31,12 @@ public class SkillController {
 
     @PostMapping("/skills/upgrade")
     @Operation(summary = "Nâng cấp 1 nhánh kỹ năng trong Skill Tree tiêu Gold")
-    public ResponseEntity<HeroDetailDto> upgradeSkill(@Valid @RequestBody UpgradeSkillRequestDto request) {
+    public ResponseEntity<HeroDetailDto> upgradeSkill(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody UpgradeSkillRequestDto request) {
+        if (principal != null && principal.getId() != null) {
+            request.setUserId(principal.getId());
+        }
         return ResponseEntity.ok(skillService.upgradeSkill(request));
     }
 }

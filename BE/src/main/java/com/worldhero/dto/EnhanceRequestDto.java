@@ -1,6 +1,6 @@
 package com.worldhero.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,11 +13,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnhanceRequestDto {
-    @NotNull(message = "userId is required")
     private UUID userId;
 
-    @NotNull(message = "itemInstanceId is required")
-    private UUID itemInstanceId;
+    @NotBlank(message = "itemInstanceId is required")
+    private String itemInstanceId;
 
-    private boolean useInsurance; // Lucky Forge Protection (0.1 WLD or token)
+    @NotBlank(message = "operationKey is required for idempotent enhancement")
+    private String operationKey;
+
+    private boolean useInsurance; // Lucky Forge Protection
 }

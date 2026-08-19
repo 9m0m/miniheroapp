@@ -17,16 +17,12 @@ public class UserProfileDto {
     private String worldIdHash;
     private String displayName;
     private long gold;
+    private long essence;
     private int gems;
     private int enhanceStones;
-    private int currentWorld;
-    private int currentStage;
-    private int currentWave;
-    private int maxClearedStage;
+    private int inventorySlots;
     private int piggyBankGems;
     private boolean isGoldenPassActive;
     private int loginDayIndex;
     private LocalDateTime loginLastClaimedAt;
-    private boolean growthFundUnlocked;
-    private String growthFundClaimedStages;
 }

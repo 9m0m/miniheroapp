@@ -19,7 +19,4 @@ public class MonetizationStatusDto {
     private int loginDayIndex;
     private LocalDateTime loginLastClaimedAt;
     private boolean canClaimToday;
-    private boolean growthFundUnlocked;
-    private List<Integer> claimedGrowthFundStages;
-    private int maxClearedStage;
 }

@@ -3,6 +3,7 @@ package com.worldhero.repository;
 import com.worldhero.model.entity.ItemInstanceEntity;
 import com.worldhero.model.enums.ItemSlot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -27,4 +28,8 @@ public interface ItemInstanceRepository extends JpaRepository<ItemInstanceEntity
 
     @Query("SELECT i FROM ItemInstanceEntity i JOIN FETCH i.template WHERE i.hero.id = :heroId")
     List<ItemInstanceEntity> findEquippedItemsWithTemplateByHeroId(@Param("heroId") UUID heroId);
+
+    @Modifying
+    @Query("DELETE FROM ItemInstanceEntity i WHERE i.id = :chestId AND i.user.id = :userId AND i.hero IS NULL")
+    int consumeChestAtomic(@Param("chestId") UUID chestId, @Param("userId") UUID userId);
 }

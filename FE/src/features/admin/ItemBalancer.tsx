@@ -26,6 +26,8 @@ const RARITY_COLORS: Record<ItemRarity, { bg: string; text: string; border: stri
   RARE: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
   EPIC: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
   LEGENDARY: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
+  MYTHIC: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30' },
+  ANCIENT: { bg: 'bg-pink-500/10', text: 'text-pink-400', border: 'border-pink-500/30' },
 };
 
 export default function ItemBalancer() {

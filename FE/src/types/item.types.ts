@@ -1,4 +1,4 @@
-import { ElementalType, HeroClass, ItemRarity, ItemSlot } from './enums';
+import { ElementalType, HeroClass, ItemRarity, ItemSlot, ItemType } from './enums';
 import { Stats } from './stats.types';
 
 export interface ItemTemplate {
@@ -8,8 +8,9 @@ export interface ItemTemplate {
   icon?: string;
   iconUrl?: string;
   iconKey?: string;
+  itemType?: ItemType;
   slot: ItemSlot;
-  requiredClass: HeroClass | null; // null = universal accessory
+  requiredClass: HeroClass | null; // null = universal accessory / material / gem / chest
   baseRarity: ItemRarity;
   elementalType: ElementalType;
   baseStats: Partial<Stats>;

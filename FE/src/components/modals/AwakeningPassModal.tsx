@@ -2,20 +2,28 @@
 
 import React from 'react';
 import { useGameStore } from '../../store/useGameStore';
-import { X, CheckCircle, Lock, Crown, Sparkles } from 'lucide-react';
+import { ModalShell } from '../ui/ModalShell';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { CheckCircle, Lock, Crown } from 'lucide-react';
 
 const PASS_DAYS = [
-  { day: 1, free: '1,000 🪙 + 1 🪨', golden: '5,000 🪙 + 5 🪨 + 🗡️ Royal Claymore (Rare)' },
-  { day: 2, free: '2,000 🪙 + 20 💎', golden: '10,000 🪙 + 100 💎 + 5 🪨' },
-  { day: 3, free: '3,000 🪙 + 3 🪨', golden: '15,000 🪙 + 15 🪨 + 💍 Emerald Ring (Rare)' },
-  { day: 4, free: '4,000 🪙 + 40 💎', golden: '20,000 🪙 + 200 💎 + 10 🪨' },
-  { day: 5, free: '5,000 🪙 + 5 🪨', golden: '25,000 🪙 + 25 🪨 + 📜 Blessing Scroll' },
-  { day: 6, free: '6,000 🪙 + 60 💎', golden: '30,000 🪙 + 300 💎 + 15 🪨' },
-  { day: 7, free: '10,000 🪙 + 100 💎', golden: '50,000 🪙 + 500 💎 + ✨ EXCALIBUR (Legendary)' },
+  { day: 1, free: '1,000 Gold + 1 Stone', golden: '5,000 Gold + 5 Stones + Royal Claymore (Rare)' },
+  { day: 2, free: '2,000 Gold + 20 Gems', golden: '10,000 Gold + 100 Gems + 5 Stones' },
+  { day: 3, free: '3,000 Gold + 3 Stones', golden: '15,000 Gold + 15 Stones + Emerald Ring (Rare)' },
+  { day: 4, free: '4,000 Gold + 40 Gems', golden: '20,000 Gold + 200 Gems + 10 Stones' },
+  { day: 5, free: '5,000 Gold + 5 Stones', golden: '25,000 Gold + 25 Stones + Blessing Scroll' },
+  { day: 6, free: '6,000 Gold + 60 Gems', golden: '30,000 Gold + 300 Gems + 15 Stones' },
+  { day: 7, free: '10,000 Gold + 100 Gems', golden: '50,000 Gold + 500 Gems + Excalibur (Legendary)' },
 ];
 
 export const AwakeningPassModal: React.FC = () => {
-  const { isGoldenPassActive, loginDayIndex, closeModal, triggerWldPayment, claimDailyPass } = useGameStore();
+  const isGoldenPassActive = useGameStore((state) => state.isGoldenPassActive);
+  const loginDayIndex = useGameStore((state) => state.loginDayIndex);
+  const activeModal = useGameStore((state) => state.activeModal);
+  const closeModal = useGameStore((state) => state.closeModal);
+  const triggerWldPayment = useGameStore((state) => state.triggerWldPayment);
+  const claimDailyPass = useGameStore((state) => state.claimDailyPass);
 
   const handleUnlockGolden = () => {
     triggerWldPayment({
@@ -28,105 +36,84 @@ export const AwakeningPassModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative w-full max-w-md rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 border border-purple-500/30 p-5 shadow-2xl text-white max-h-[90vh] flex flex-col">
-        {/* Close Button */}
-        <button
-          onClick={closeModal}
-          className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition"
-        >
-          <X size={18} />
-        </button>
-
-        {/* Header */}
-        <div className="text-center mb-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-semibold mb-1">
-            <Crown size={14} className="text-amber-400" />
-            <span>7-DAY LOGIN STREAK</span>
-          </div>
-          <h2 className="text-lg font-bold bg-gradient-to-r from-purple-300 via-pink-400 to-amber-300 bg-clip-text text-transparent">
-            7-DAY HERO AWAKENING PASS
-          </h2>
-          <p className="text-[11px] text-slate-400">
-            Check-in daily to claim massive resources and legendary gear
-          </p>
-        </div>
-
-        {/* 7 Days List (Scrollable) */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+    <ModalShell
+      isOpen={activeModal === 'AWAKENING_PASS'}
+      onClose={closeModal}
+      icon={<Crown size={18} className="text-purple-400" />}
+      title="Hero Awakening Pass"
+      description="7-Day streak check-in rewards"
+    >
+      <div className="space-y-3">
+        {/* 7 Days List */}
+        <div className="space-y-2 max-h-[44vh] overflow-y-auto pr-0.5">
           {PASS_DAYS.map((item, idx) => {
             const isToday = idx === loginDayIndex;
             const isPast = idx < loginDayIndex;
 
             return (
-              <div
+              <Card
                 key={item.day}
-                className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition ${
+                variant={isToday ? 'raised' : 'base'}
+                padding="sm"
+                className={`flex items-center justify-between gap-3 ${
                   isToday
-                    ? 'bg-purple-900/40 border-purple-400/60 shadow-lg shadow-purple-500/10 ring-1 ring-purple-400'
+                    ? 'border-purple-500/60 ring-1 ring-purple-500/40'
                     : isPast
-                    ? 'bg-slate-900/40 border-slate-800 opacity-60'
-                    : 'bg-slate-900/80 border-slate-800'
+                    ? 'opacity-60'
+                    : ''
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex flex-col items-center justify-center font-bold text-xs">
-                    <span className="text-[9px] text-slate-400">DAY</span>
-                    <span className="text-amber-400">{item.day}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex flex-col items-center justify-center font-bold text-xs shrink-0">
+                    <span className="text-xs text-slate-400">DAY</span>
+                    <span className="text-amber-400 font-mono">{item.day}</span>
                   </div>
 
-                  <div>
-                    <div className="text-xs font-semibold text-slate-200">
-                      Free: <span className="font-normal text-slate-300">{item.free}</span>
+                  <div className="min-w-0 text-xs">
+                    <div className="text-slate-300 font-medium truncate">
+                      Free: <span className="text-slate-400">{item.free}</span>
                     </div>
-                    <div className="text-[11px] text-amber-300 font-semibold flex items-center gap-1 mt-0.5">
-                      <Crown size={11} className="text-amber-400" />
-                      <span>{item.golden}</span>
+                    <div className="text-amber-300 font-semibold flex items-center gap-1 mt-0.5 truncate">
+                      <Crown size={11} className="text-amber-400 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{item.golden}</span>
                     </div>
                   </div>
                 </div>
 
-                {isPast ? (
-                  <CheckCircle size={18} className="text-emerald-400 flex-shrink-0" />
-                ) : isToday ? (
-                  <button
-                    onClick={claimDailyPass}
-                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs hover:brightness-110 active:scale-95 transition"
-                  >
-                    Claim
-                  </button>
-                ) : (
-                  <Lock size={15} className="text-slate-600 flex-shrink-0" />
-                )}
-              </div>
+                <div className="shrink-0">
+                  {isPast ? (
+                    <CheckCircle size={18} className="text-emerald-400" aria-hidden="true" />
+                  ) : isToday ? (
+                    <Button size="sm" variant="accent" onClick={() => claimDailyPass(idx + 1)}>
+                      Claim
+                    </Button>
+                  ) : (
+                    <Lock size={15} className="text-slate-600" aria-hidden="true" />
+                  )}
+                </div>
+              </Card>
             );
           })}
         </div>
 
-        {/* Footer: Golden Pass Promo & Action */}
-        <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
-          <div>
-            <div className="text-xs font-bold text-amber-300 flex items-center gap-1">
-              <Sparkles size={13} />
-              <span>Unlock 5x Golden Track</span>
-            </div>
-            <div className="text-[10px] text-slate-400">Guaranteed Legendary Excalibur on Day 7</div>
-          </div>
-
-          {!isGoldenPassActive ? (
-            <button
-              onClick={handleUnlockGolden}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 hover:brightness-110 active:scale-95 transition"
-            >
-              Unlock 1.0 WLD
-            </button>
-          ) : (
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">
-              Golden Active ✨
-            </span>
-          )}
-        </div>
+        {/* Golden Track CTA */}
+        {!isGoldenPassActive ? (
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={handleUnlockGolden}
+          >
+            <Crown size={15} className="mr-1.5 text-amber-400" aria-hidden="true" />
+            <span>Unlock Golden Track — 1.0 WLD</span>
+          </Button>
+        ) : (
+          <Card variant="raised" padding="sm" className="text-center text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 border-amber-500/40">
+            <Crown size={14} aria-hidden="true" />
+            <span>Golden Track Active (7-Day VIP Privileges)</span>
+          </Card>
+        )}
       </div>
-    </div>
+    </ModalShell>
   );
 };

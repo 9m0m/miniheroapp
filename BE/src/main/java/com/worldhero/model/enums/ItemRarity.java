@@ -1,11 +1,13 @@
 package com.worldhero.model.enums;
 
 public enum ItemRarity {
-    COMMON("Phổ Thông", "#9E9E9E", 0, 0, 1.0),
-    UNCOMMON("Đặc Biệt", "#4CAF50", 1, 0, 1.25),
-    RARE("Hiếm", "#2196F3", 2, 1, 1.6),
-    EPIC("Sử Thi", "#9C27B0", 3, 2, 2.1),
-    LEGENDARY("Huyền Thoại", "#FF9800", 4, 3, 3.0);
+    COMMON("Phổ Thông", "#94A3B8", 0, 0, 1.0),
+    UNCOMMON("Đặc Biệt", "#34D399", 1, 0, 1.25),
+    RARE("Hiếm", "#38BDF8", 2, 1, 1.6),
+    EPIC("Sử Thi", "#C084FC", 3, 2, 2.1),
+    LEGENDARY("Huyền Thoại", "#F59E0B", 4, 3, 3.0),
+    MYTHIC("Thần Thoại", "#F43F5E", 5, 3, 4.2),
+    ANCIENT("Cổ Đại", "#EC4899", 6, 3, 6.0);
 
     private final String displayName;
     private final String hexColor;
@@ -47,7 +49,9 @@ public enum ItemRarity {
             case UNCOMMON -> RARE;
             case RARE -> EPIC;
             case EPIC -> LEGENDARY;
-            case LEGENDARY -> null;
+            case LEGENDARY -> MYTHIC;
+            case MYTHIC -> ANCIENT;
+            case ANCIENT -> null;
         };
     }
 }

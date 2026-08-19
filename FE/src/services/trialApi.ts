@@ -23,9 +23,9 @@ export const trialApi = {
     await apiClient.post(`/arena/privacy?userId=${userId}&isPublic=${isPublic}`);
   },
 
-  inspectBuild: async (targetUserId: string, isAdmin: boolean = false): Promise<BuildInspectResponse> => {
+  inspectBuild: async (targetUserId: string): Promise<BuildInspectResponse> => {
     const res = await apiClient.get<BuildInspectResponse>(
-      `/arena/inspect?targetUserId=${targetUserId}&isAdmin=${isAdmin}`
+      `/arena/inspect?targetUserId=${targetUserId}`
     );
     return res.data;
   },

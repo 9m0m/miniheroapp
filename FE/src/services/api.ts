@@ -6,16 +6,15 @@
 import { userApi } from './userApi';
 import { heroApi } from './heroApi';
 import { inventoryApi } from './inventoryApi';
-import { battleApi } from './battleApi';
 import { upgradeApi } from './upgradeApi';
 import { cubeApi } from './cubeApi';
 import { craftingApi } from './craftingApi';
 import { monetizationApi } from './monetizationApi';
 import { skillApi } from './skillApi';
-import { worldApi } from './worldApi';
 import { adminApi } from './adminApi';
+import { chestVaultApi } from './chestVaultApi';
 
-export { adminApi };
+export { adminApi, chestVaultApi };
 
 export const gameApi = {
   // User Profile
@@ -29,8 +28,9 @@ export const gameApi = {
   equipItem: inventoryApi.equipItem,
   unequipItem: inventoryApi.unequipItem,
 
-  // Battle Progression
-  clearWave: battleApi.clearWave,
+  // Chest Vault
+  getChestVault: chestVaultApi.getChestVault,
+  openVaultChest: chestVaultApi.openChest,
 
   // Enhancement (+1 to +15)
   enhanceItem: upgradeApi.enhanceItem,
@@ -50,24 +50,20 @@ export const gameApi = {
   getMonetizationStatus: monetizationApi.getStatus,
   smashPiggyBank: monetizationApi.smashPiggyBank,
   claimDailyPass: monetizationApi.claimDailyPass,
-  claimGrowthFund: monetizationApi.claimGrowthFund,
   mockWldPay: monetizationApi.mockWldPay,
 
   // Phase 4: Skill Tree & Worlds
   getSkillTree: skillApi.getSkillTree,
   upgradeSkill: skillApi.upgradeSkill,
-  getAllWorlds: worldApi.getAllWorlds,
 };
 
 export {
   userApi,
   heroApi,
   inventoryApi,
-  battleApi,
   upgradeApi,
   cubeApi,
   craftingApi,
   monetizationApi,
   skillApi,
-  worldApi,
 };

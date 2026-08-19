@@ -3,10 +3,13 @@ package com.worldhero.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.worldhero.dto.CombatStatsDto;
 import com.worldhero.dto.HeroDetailDto;
 import com.worldhero.dto.ItemInstanceDto;
 import com.worldhero.dto.ItemTemplateDto;
+import com.worldhero.dto.ReviveHeroResponseDto;
 import com.worldhero.dto.StatsDto;
+import com.worldhero.exception.GameRuleViolationException;
 import com.worldhero.engine.DamageCalculator;
 import com.worldhero.engine.StatEvaluator;
 import com.worldhero.model.entity.HeroEntity;
@@ -40,6 +43,8 @@ public class HeroServiceImpl implements HeroService {
     private final UserService userService;
     private final StatEvaluator statEvaluator;
     private final DamageCalculator damageCalculator;
+    private final com.worldhero.service.HeroCatalogService heroCatalogService;
+    private final com.worldhero.service.TowerGearService towerGearService;
 
     @Override
     @Transactional(readOnly = true)
@@ -59,7 +64,7 @@ public class HeroServiceImpl implements HeroService {
     public HeroDetailDto buildHeroDetailDto(HeroEntity hero) {
         List<ItemInstanceEntity> equippedInstances = itemInstanceRepository.findEquippedItemsWithTemplateByHeroId(hero.getId());
 
-        StatsDto combinedStats = createBaseStatsForHero(hero);
+        StatsDto combinedStats = hero.getHeroClass() != null ? createBaseStatsForHero(hero) : StatsDto.createDefaultHeroStats();
         List<ItemInstanceDto> equippedItemDtos = new ArrayList<>();
 
         for (ItemInstanceEntity instance : equippedInstances) {
@@ -72,18 +77,56 @@ public class HeroServiceImpl implements HeroService {
             combinedStats.add(itemStats);
         }
 
-        // Add Skill Tree Bonus Stats
+        // Add Skill Tree Bonus Stats only for legacy heroes
         Map<String, Integer> skillsMap = parseSkills(hero.getSkills());
-        StatsDto skillBonus = calculateSkillBonus(hero.getHeroClass(), skillsMap);
-        combinedStats.add(skillBonus);
+        if (hero.getHeroClass() != null) {
+            StatsDto skillBonus = calculateSkillBonus(hero.getHeroClass(), skillsMap);
+            combinedStats.add(skillBonus);
+        }
 
         combinedStats.clamp();
         double dps = damageCalculator.calculateTheoreticalDPS(combinedStats);
 
+        String templateId = hero.getHeroTemplateId() != null && !hero.getHeroTemplateId().isBlank()
+                ? hero.getHeroTemplateId()
+                : (hero.getHeroClass() != null ? heroCatalogService.mapLegacyClassToTemplateId(hero.getHeroClass()) : null);
+
+        com.worldhero.model.enums.HeroRole role = null;
+        CombatStatsDto towerStats = null;
+
+        if (templateId != null) {
+            var templateOpt = heroCatalogService.getTemplateById(templateId);
+            if (templateOpt.isPresent()) {
+                role = templateOpt.get().getRole();
+                CombatStatsDto baseTower = templateOpt.get().getBaseStats();
+                if (baseTower != null) {
+                    // 1. Level + Stars progression stats (via static calculation)
+                    CombatStatsDto progStats = com.worldhero.service.HeroProgressionService.calculateHeroProgressionStats(baseTower, hero.getLevel(), hero.getStars());
+
+                    // 2. Equipped Gear bonus stats
+                    CombatStatsDto gearStats = towerGearService.computeTotalGearStats(equippedInstances);
+
+                    towerStats = CombatStatsDto.builder()
+                            .maxHp(progStats.getMaxHp() + gearStats.getMaxHp())
+                            .atk(progStats.getAtk() + gearStats.getAtk())
+                            .armor(progStats.getArmor() + gearStats.getArmor())
+                            .speed(Math.max(60, Math.min(180, progStats.getSpeed() + gearStats.getSpeed())))
+                            .critRate(Math.min(com.worldhero.engine.tower.TowerCombatMath.MAX_CRIT_RATE, progStats.getCritRate() + gearStats.getCritRate()))
+                            .critDmg(Math.min(200.0, Math.max(150.0, progStats.getCritDmg() + (gearStats.getCritDmg() - 150.0))))
+                            .build();
+                }
+            }
+        }
+
         return HeroDetailDto.builder()
                 .id(hero.getId())
+                .templateId(templateId)
                 .heroClass(hero.getHeroClass())
+                .role(role)
                 .level(hero.getLevel())
+                .stars(hero.getStars())
+                .shards(hero.getShards())
+                .towerStats(towerStats)
                 .exp(hero.getExp())
                 .isInParty(hero.isInParty())
                 .slotIndex(hero.getSlotIndex())
@@ -95,7 +138,10 @@ public class HeroServiceImpl implements HeroService {
     }
 
     private StatsDto createBaseStatsForHero(HeroEntity hero) {
-        StatsDto base = new StatsDto();
+        if (hero.getHeroClass() == null) {
+            return StatsDto.createDefaultHeroStats();
+        }
+        StatsDto base = StatsDto.createDefaultHeroStats();
         double levelScaling = 1.0 + (Math.max(1, hero.getLevel()) - 1) * 0.05;
 
         switch (hero.getHeroClass()) {
@@ -204,5 +250,28 @@ public class HeroServiceImpl implements HeroService {
             }
         }
         return bonus;
+    }
+
+    @Override
+    @Transactional
+    public ReviveHeroResponseDto reviveHero(UUID userId, HeroClass heroClass) {
+        UserEntity user = userService.getUserOrThrow(userId);
+        final int REVIVE_COST = 10;
+
+        if (user.getGems() < REVIVE_COST) {
+            throw new GameRuleViolationException("Insufficient gems for instant revive. Required: " + REVIVE_COST + ", Available: " + user.getGems());
+        }
+
+        user.setGems(user.getGems() - REVIVE_COST);
+
+        log.info("User {} spent {} gems to revive {}. Remaining gems: {}", userId, REVIVE_COST, heroClass, user.getGems());
+
+        return ReviveHeroResponseDto.builder()
+                .userId(user.getId())
+                .heroClass(heroClass)
+                .cost(REVIVE_COST)
+                .remainingGems(user.getGems())
+                .message("Hero " + heroClass + " revived successfully.")
+                .build();
     }
 }

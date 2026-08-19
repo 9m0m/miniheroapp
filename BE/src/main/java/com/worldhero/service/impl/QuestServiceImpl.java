@@ -243,7 +243,7 @@ public class QuestServiceImpl implements QuestService {
     private void spawnRewardItem(UserEntity user, ItemRarity rarity) {
         ItemTemplateEntity tmpl = itemTemplateCacheService.getRandomTemplateByRarity(rarity);
         if (tmpl != null) {
-            int ilvl = Math.max(1, (user.getCurrentWorld() - 1) * 10 + user.getCurrentStage());
+            int ilvl = 1;
             ItemInstanceEntity item = ItemInstanceEntity.builder()
                     .user(user)
                     .template(tmpl)

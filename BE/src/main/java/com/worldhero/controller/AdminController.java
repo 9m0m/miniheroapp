@@ -29,62 +29,6 @@ public class AdminController {
     }
 
     // ==========================================
-    // 👾 MONSTER TEMPLATES
-    // ==========================================
-
-    @GetMapping("/monsters")
-    @Operation(summary = "Lấy toàn bộ danh sách Master Quái vật")
-    public ResponseEntity<List<MonsterTemplateDto>> getAllMonsters() {
-        return ResponseEntity.ok(adminService.getAllMonsters());
-    }
-
-    @GetMapping("/monsters/{id}")
-    @Operation(summary = "Lấy thông tin chi tiết một Quái vật theo ID")
-    public ResponseEntity<MonsterTemplateDto> getMonsterById(@PathVariable String id) {
-        return ResponseEntity.ok(adminService.getMonsterById(id));
-    }
-
-    @PostMapping("/monsters")
-    @Operation(summary = "Tạo Quái vật mới")
-    public ResponseEntity<MonsterTemplateDto> createMonster(@RequestBody MonsterTemplateDto dto) {
-        return ResponseEntity.ok(adminService.createMonster(dto));
-    }
-
-    @PutMapping("/monsters/{id}")
-    @Operation(summary = "Cập nhật chỉ số Quái vật")
-    public ResponseEntity<MonsterTemplateDto> updateMonster(@PathVariable String id, @RequestBody MonsterTemplateDto dto) {
-        return ResponseEntity.ok(adminService.updateMonster(id, dto));
-    }
-
-    @DeleteMapping("/monsters/{id}")
-    @Operation(summary = "Xóa Quái vật khỏi hệ thống")
-    public ResponseEntity<Void> deleteMonster(@PathVariable String id) {
-        adminService.deleteMonster(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ==========================================
-    // ⚔️ STAGE & WAVE LIVE BALANCING
-    // ==========================================
-
-    @GetMapping("/stages/{world}/{stage}")
-    @Operation(summary = "Lấy cấu hình 30 Wave và Drop Table của một Stage")
-    public ResponseEntity<StageDetailConfigDto> getStageDetailConfig(
-            @PathVariable int world,
-            @PathVariable int stage) {
-        return ResponseEntity.ok(adminService.getStageDetailConfig(world, stage));
-    }
-
-    @PutMapping("/stages/{world}/{stage}")
-    @Operation(summary = "Lưu cấu hình 30 Wave & Drop Table của Stage vào Database")
-    public ResponseEntity<StageDetailConfigDto> updateStageDetailConfig(
-            @PathVariable int world,
-            @PathVariable int stage,
-            @RequestBody StageDetailConfigDto dto) {
-        return ResponseEntity.ok(adminService.updateStageDetailConfig(world, stage, dto));
-    }
-
-    // ==========================================
     // 🛡️ MASTER ITEM TEMPLATES BALANCER
     // ==========================================
 
@@ -121,12 +65,20 @@ public class AdminController {
     }
 
     // ==========================================
-    // 🎯 LIVE BATTLE SIMULATION
+    // 🏰 PROGRESS TOWER BALANCE VALIDATION
     // ==========================================
 
-    @PostMapping("/simulate-battle")
-    @Operation(summary = "Chạy mô phỏng 100 trận đấu giả lập giữa Party và Quái vật")
-    public ResponseEntity<BattleSimulationResultDto> simulateBattle(@RequestBody BattleSimulationRequestDto request) {
-        return ResponseEntity.ok(adminService.simulateBattle(request));
+    private final com.worldhero.service.TowerFloorConfigService towerFloorConfigService;
+
+    @GetMapping("/tower/validate")
+    @Operation(summary = "Dry-run kiểm tra tính toàn vẹn và cân bằng của 30 Floor Tower")
+    public ResponseEntity<java.util.Map<String, Object>> validateTowerFloors() {
+        boolean valid = towerFloorConfigService.validateAllFloors();
+        return ResponseEntity.ok(java.util.Map.of(
+                "valid", valid,
+                "totalFloors", com.worldhero.service.TowerFloorConfigService.TOTAL_FLOORS,
+                "floors", towerFloorConfigService.getAllFloors().size(),
+                "status", "ALL_FLOORS_VALIDATED"
+        ));
     }
 }

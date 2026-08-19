@@ -31,7 +31,7 @@ export const LeaderboardAudit: React.FC = () => {
 
   const handleSuperInspect = async (targetUserId: string) => {
     try {
-      const data = await trialApi.inspectBuild(targetUserId, true); // isAdmin = true grants 100% access
+      const data = await trialApi.inspectBuild(targetUserId);
       setInspectData(data);
       setInspectOpen(true);
     } catch (err) {

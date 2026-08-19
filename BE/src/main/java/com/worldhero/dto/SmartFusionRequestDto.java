@@ -20,5 +20,5 @@ public class SmartFusionRequestDto {
 
     @NotNull(message = "itemInstanceIds is required")
     @Size(min = 3, max = 3, message = "Smart Fusion requires exactly 3 item instances of the same rarity")
-    private List<UUID> itemInstanceIds;
+    private List<String> itemInstanceIds;
 }

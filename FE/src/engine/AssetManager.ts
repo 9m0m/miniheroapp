@@ -1,38 +1,73 @@
-import { HeroClass, ElementalType } from '@/types/game.types';
+import { HeroClass } from '@/types/game.types';
+import { SPRITE_MANIFEST, validateSpriteManifest } from './SpriteManifest';
 
 export class AssetManager {
-  private heroImages: Record<HeroClass, HTMLImageElement | null> = {
+  private isInitialized = false;
+  private manifestSprites: Map<string, HTMLImageElement> = new Map();
+
+  private heroPortraits: Record<HeroClass, HTMLImageElement | null> = {
     WARRIOR: null,
     RANGER: null,
     MAGE: null,
     PRIEST: null,
   };
 
-  private monsterImages: Record<string, HTMLImageElement> = {};
-  private backgroundImages: Record<string, HTMLImageElement> = {};
+  private monsterPortraits: Record<string, HTMLImageElement> = {};
 
   public init() {
-    this.preloadHeroSprites();
-    this.preloadMonsterSprites();
-    this.preloadStageBackgrounds();
+    if (this.isInitialized) return;
+    this.isInitialized = true;
+
+    // Validate manifest schema in development
+    if (process.env.NODE_ENV !== 'production') {
+      const validation = validateSpriteManifest();
+      if (!validation.valid) {
+        console.warn('[SpriteManifest] Validation warnings:', validation.errors);
+      }
+    }
+
+    this.preloadManifestSprites();
+    this.preloadHeroPortraits();
+    this.preloadMonsterPortraits();
   }
 
-  private preloadHeroSprites() {
-    const heroSources: Record<HeroClass, string[]> = {
-      WARRIOR: ['/knightclass.jpg', '/warrior_anim.png', '/warrior.png'],
-      RANGER: ['/archer.jpg', '/ranger_anim.png', '/ranger.png', '/archer.png'],
-      MAGE: ['/wizard.jpg', '/mage_anim.png', '/mage.png', '/wizard.png'],
-      PRIEST: ['/priest_anim.png', '/priest.png', '/healer.png'],
+  /**
+   * Preload transparent sprite sheets defined in SpriteManifest
+   */
+  private preloadManifestSprites() {
+    Object.values(SPRITE_MANIFEST).forEach((entry) => {
+      const img = new Image();
+      img.src = entry.src;
+      img.onload = () => {
+        if (img.naturalWidth === entry.expectedWidth && img.naturalHeight === entry.expectedHeight) {
+          this.manifestSprites.set(entry.id, img);
+        }
+      };
+      img.onerror = () => {
+        // Optional asset during early dev
+      };
+    });
+  }
+
+  /**
+   * Preload static portrait fallbacks for heroes
+   */
+  private preloadHeroPortraits() {
+    const portraitSources: Record<HeroClass, string[]> = {
+      WARRIOR: ['/knightclass.jpg', '/warrior.png'],
+      RANGER: ['/archer.jpg', '/ranger.png', '/archer.png'],
+      MAGE: ['/wizard.jpg', '/mage.png', '/wizard.png'],
+      PRIEST: ['/priest.png', '/healer.png'],
     };
 
-    (Object.keys(heroSources) as HeroClass[]).forEach((heroClass) => {
-      const sources = heroSources[heroClass];
+    (Object.keys(portraitSources) as HeroClass[]).forEach((heroClass) => {
+      const sources = portraitSources[heroClass];
       const tryLoad = (idx: number) => {
         if (idx >= sources.length) return;
         const img = new Image();
         img.src = sources[idx];
         img.onload = () => {
-          this.heroImages[heroClass] = img;
+          this.heroPortraits[heroClass] = img;
         };
         img.onerror = () => {
           tryLoad(idx + 1);
@@ -42,68 +77,40 @@ export class AssetManager {
     });
   }
 
-  private preloadMonsterSprites() {
-    const monsterMap: Record<string, string> = {
-      firewolf: '/firewolf.jpg',
-      icewolf: '/iceworf.jpg',
-      lightwolf: '/lightwolf.jpg',
-      FIRE: '/firewolf.jpg',
-      COLD: '/iceworf.jpg',
-      LIGHTNING: '/lightwolf.jpg',
-      PHYSICAL: '/lightwolf.jpg',
-      CHAOS: '/lightwolf.jpg',
+  /**
+   * Preload static monster portraits
+   */
+  private preloadMonsterPortraits() {
+    const monsterMap: Record<string, string[]> = {
+      normalwolf: ['/normalwolf.png'],
     };
 
-    Object.entries(monsterMap).forEach(([key, url]) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        this.monsterImages[key] = img;
+    Object.entries(monsterMap).forEach(([key, urls]) => {
+      const tryLoad = (idx: number) => {
+        if (idx >= urls.length) return;
+        const img = new Image();
+        img.src = urls[idx];
+        img.onload = () => {
+          this.monsterPortraits[key] = img;
+        };
+        img.onerror = () => {
+          tryLoad(idx + 1);
+        };
       };
+      tryLoad(0);
     });
   }
 
-  private preloadStageBackgrounds() {
-    for (let w = 1; w <= 4; w++) {
-      ['s1', 's3', 's5', 's8', 's10'].forEach((stageKey) => {
-        const key = `w${w}_${stageKey}`;
-        const img = new Image();
-        img.src = `/backgrounds/bg_${key}.png`;
-        img.onload = () => {
-          this.backgroundImages[key] = img;
-        };
-      });
-    }
+  public getSprite(id: string): HTMLImageElement | undefined {
+    return this.manifestSprites.get(id);
   }
 
-  public getHeroImage(heroClass: HeroClass): HTMLImageElement | null {
-    return this.heroImages[heroClass];
+  public getHeroPortrait(heroClass: HeroClass): HTMLImageElement | null {
+    return this.heroPortraits[heroClass];
   }
 
-  public getMonsterImage(mobName: string, elementalType: ElementalType): HTMLImageElement | null {
-    const nameLower = (mobName || '').toLowerCase();
-
-    // 1. Direct name matching
-    if (nameLower.includes('fire') || nameLower.includes('lava') || nameLower.includes('flame')) {
-      return this.monsterImages['firewolf'] || null;
-    }
-    if (nameLower.includes('ice') || nameLower.includes('frost') || nameLower.includes('glacial') || nameLower.includes('subzero')) {
-      return this.monsterImages['icewolf'] || null;
-    }
-    if (nameLower.includes('light') || nameLower.includes('timber') || nameLower.includes('thunder') || nameLower.includes('emerald') || nameLower.includes('void')) {
-      return this.monsterImages['lightwolf'] || null;
-    }
-
-    // 2. Elemental type matching
-    if (elementalType === 'FIRE') return this.monsterImages['firewolf'] || null;
-    if (elementalType === 'COLD') return this.monsterImages['icewolf'] || null;
-    if (elementalType === 'CHAOS' || elementalType === 'PHYSICAL') return this.monsterImages['lightwolf'] || null;
-
-    return this.monsterImages['lightwolf'] || null;
-  }
-
-  public getBackgroundImage(key: string): HTMLImageElement | null {
-    return this.backgroundImages[key] || null;
+  public getMonsterPortrait(monsterId: string): HTMLImageElement | undefined {
+    return this.monsterPortraits[monsterId];
   }
 }
 

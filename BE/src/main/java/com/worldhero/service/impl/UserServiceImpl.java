@@ -61,18 +61,14 @@ public class UserServiceImpl implements UserService {
                 .worldIdHash(user.getWorldIdHash())
                 .displayName(user.getDisplayName())
                 .gold(user.getGold())
+                .essence(user.getEssence())
                 .gems(user.getGems())
                 .enhanceStones(user.getEnhanceStones())
-                .currentWorld(user.getCurrentWorld())
-                .currentStage(user.getCurrentStage())
-                .currentWave(user.getCurrentWave())
-                .maxClearedStage(user.getMaxClearedStage())
+                .inventorySlots(user.getInventorySlots())
                 .piggyBankGems(user.getPiggyBankGems())
                 .isGoldenPassActive(user.isGoldenPassActive())
                 .loginDayIndex(user.getLoginDayIndex())
                 .loginLastClaimedAt(user.getLoginLastClaimedAt())
-                .growthFundUnlocked(user.isGrowthFundUnlocked())
-                .growthFundClaimedStages(user.getGrowthFundClaimedStages())
                 .build();
     }
 }

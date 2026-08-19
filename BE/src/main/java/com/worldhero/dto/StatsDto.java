@@ -19,19 +19,19 @@ public class StatsDto {
     @Builder.Default
     private double atkPercent = 0.0;    // % Tăng tổng DMG
     @Builder.Default
-    private double atkSpeed = 1.0;      // Tốc độ đánh (đòn/s)
+    private double atkSpeed = 0.0;      // Tốc độ đánh cộng thêm (đòn/s)
     @Builder.Default
-    private double critRate = 5.0;      // % Tỉ lệ chí mạng (cap 100%)
+    private double critRate = 0.0;      // % Tỉ lệ chí mạng cộng thêm
     @Builder.Default
-    private double critDmg = 150.0;     // % Sát thương chí mạng (base 150%)
+    private double critDmg = 0.0;       // % Sát thương chí mạng cộng thêm (hero base 150%)
     @Builder.Default
     private double elemDmgBonus = 0.0;  // % Sát thương nguyên tố phẳng
 
     // 2. Nhóm Phòng Thủ & Sinh Tồn (Defensive)
     @Builder.Default
-    private double maxHp = 100.0;       // Máu tối đa
+    private double maxHp = 0.0;         // Máu tối đa
     @Builder.Default
-    private double armor = 0.0;         // Giáp (giảm % dmg vật lý asymptotic)
+    private double armor = 0.0;         // Giáp
     @Builder.Default
     private double dmgReduction = 0.0;  // % Giảm toàn bộ sát thương (cap 75%)
     @Builder.Default
@@ -62,6 +62,15 @@ public class StatsDto {
     private double chestDropBonus = 0.0;// % Tăng tỉ lệ rớt Rương
     @Builder.Default
     private double expBonus = 0.0;      // % Tăng EXP nhận được
+
+    public static StatsDto createDefaultHeroStats() {
+        return StatsDto.builder()
+                .maxHp(100.0)
+                .atkSpeed(1.0)
+                .critRate(5.0)
+                .critDmg(150.0)
+                .build();
+    }
 
     /**
      * Cộng dồn một tập hợp chỉ số khác vào chỉ số hiện tại (Additive Stacking).

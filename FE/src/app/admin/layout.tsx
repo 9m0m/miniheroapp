@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 LiveOps Portal
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Game CMS • Stages, Monsters & Balancing</p>
+            <p className="text-[10px] text-slate-400">Game CMS • Core v2 balancing</p>
           </div>
         </div>
 

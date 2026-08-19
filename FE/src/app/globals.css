@@ -5,15 +5,26 @@
 :root {
   --background: #0b0e14;
   --foreground: #ededed;
+  --surface-base: #0b0e14;
+  --surface-raised: #151922;
+  --surface-overlay: #1e2430;
+  --border-subtle: #2a3241;
+  --border-strong: #3b475d;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  user-select: none;
-  -webkit-user-select: none;
   overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Touch responsiveness */
+button, a, [role="button"], [role="tab"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Custom Pixelated & Game Scrollbar */
@@ -28,12 +39,23 @@ body {
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ffd700;
+  background: #3b475d;
 }
 
-/* Rarity Glow Effects */
-.glow-common { box-shadow: 0 0 8px rgba(158, 158, 158, 0.4); }
-.glow-uncommon { box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); }
-.glow-rare { box-shadow: 0 0 12px rgba(33, 150, 243, 0.6); }
-.glow-epic { box-shadow: 0 0 15px rgba(156, 39, 176, 0.7); }
-.glow-legendary { box-shadow: 0 0 20px rgba(255, 152, 0, 0.85); }
+/* Respect user's reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer 1.6s infinite;
+}

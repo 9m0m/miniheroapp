@@ -6,6 +6,7 @@ import com.worldhero.model.enums.ElementalType;
 import com.worldhero.model.enums.HeroClass;
 import com.worldhero.model.enums.ItemRarity;
 import com.worldhero.model.enums.ItemSlot;
+import com.worldhero.model.enums.ItemType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,6 +35,11 @@ public class ItemTemplateEntity {
 
     @Column(name = "icon_key", nullable = false, length = 100)
     private String iconKey; // e.g. "⚔️", "🛡️", or asset key
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "item_type", length = 30)
+    @Builder.Default
+    private ItemType itemType = ItemType.EQUIPMENT;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "slot_type", nullable = false, length = 30)
@@ -187,6 +193,7 @@ public class ItemTemplateEntity {
                 .name(name)
                 .description(description)
                 .iconUrl(iconKey)
+                .itemType(itemType)
                 .slot(slotType)
                 .requiredClass(requiredClass)
                 .baseRarity(baseRarity)

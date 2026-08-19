@@ -1,6 +1,6 @@
 package com.worldhero.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnequipRequestDto {
-    @NotNull(message = "userId is required")
     private UUID userId;
 
-    @NotNull(message = "itemInstanceId is required")
-    private UUID itemInstanceId;
+    @NotBlank(message = "itemInstanceId is required")
+    private String itemInstanceId;
 }

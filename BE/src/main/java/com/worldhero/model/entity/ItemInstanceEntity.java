@@ -18,10 +18,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "item_instances", indexes = {
-    @Index(name = "idx_item_user_id", columnList = "user_id"),
-    @Index(name = "idx_item_hero_id", columnList = "hero_id")
-})
+@Table(
+    name = "item_instances",
+    indexes = {
+        @Index(name = "idx_item_user_id", columnList = "user_id"),
+        @Index(name = "idx_item_hero_id", columnList = "hero_id")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_hero_equipped_slot", columnNames = {"hero_id", "equipped_slot"})
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,6 +40,9 @@ public class ItemInstanceEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Version
+    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

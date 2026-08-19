@@ -2,28 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../../store/useGameStore';
-import { X, Sparkles, Zap, ArrowUpCircle, CheckCircle2, Lock } from 'lucide-react';
+import { ModalShell } from '../ui/ModalShell';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import {
+  Zap,
+  CheckCircle2,
+  Coins,
+  Sparkles,
+} from 'lucide-react';
 import { HeroClass, HeroSkillTree, SkillNode } from '../../types';
 
 export const SkillTreeModal: React.FC = () => {
-  const {
-    heroes,
-    selectedHeroClass,
-    gold,
-    activeModal,
-    closeModal,
-    addFloatingText,
-    upgradeHeroSkill,
-  } = useGameStore();
+  const heroes = useGameStore((state) => state.heroes);
+  const selectedHeroClass = useGameStore((state) => state.selectedHeroClass);
+  const gold = useGameStore((state) => state.gold);
+  const activeModal = useGameStore((state) => state.activeModal);
+  const closeModal = useGameStore((state) => state.closeModal);
+  const addFloatingText = useGameStore((state) => state.addFloatingText);
+  const upgradeHeroSkill = useGameStore((state) => state.upgradeHeroSkill);
 
   const hero = heroes[selectedHeroClass];
   const [skillTree, setSkillTree] = useState<HeroSkillTree | null>(null);
   const [isUpgrading, setIsUpgrading] = useState(false);
 
-  // Build local tree view based on class
   useEffect(() => {
     if (!hero) return;
-    setSkillTree(getDefaultTreeForHero(hero.id, hero.heroClass, hero.skills || {}));
+    setSkillTree(getDefaultTreeForHero(hero.id, hero.heroClass || selectedHeroClass, hero.skills || {}));
   }, [hero, selectedHeroClass]);
 
   if (activeModal !== 'SKILL_TREE' || !hero || !skillTree) return null;
@@ -34,68 +39,56 @@ export const SkillTreeModal: React.FC = () => {
     }
 
     setIsUpgrading(true);
-    const success = await upgradeHeroSkill(hero.id, skillNode.id);
+    const success = upgradeHeroSkill(hero.heroClass || selectedHeroClass, skillNode.id);
     setIsUpgrading(false);
 
     if (success) {
-      addFloatingText(`✨ UPGRADED: ${skillNode.name.toUpperCase()} (LV.${skillNode.currentLevel + 1})!`, 180, 80, '#10b981', true);
+      addFloatingText(`Skill Upgraded: ${skillNode.name}!`, 180, 80, '#10b981', true);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative w-full max-w-sm rounded-2xl bg-gradient-to-b from-slate-900 via-slate-850 to-slate-950 border border-yellow-500/30 p-5 shadow-2xl text-white">
-        {/* Close */}
-        <button
-          onClick={closeModal}
-          className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-800 text-slate-400 hover:text-white transition"
-        >
-          <X size={16} />
-        </button>
-
-        {/* Header */}
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-bold mb-1 border border-yellow-500/30">
-            <Zap size={13} />
-            <span>CLASS SKILL TREE</span>
-          </div>
-          <h3 className="text-base font-bold text-slate-100">{hero.name}</h3>
-          <p className="text-[10px] text-slate-400">
-            Upgrade specialized class passives with <strong>Gold</strong> to permanently empower combat stats.
-          </p>
-        </div>
-
+    <ModalShell
+      isOpen={activeModal === 'SKILL_TREE'}
+      onClose={closeModal}
+      icon={<Zap size={18} className="text-yellow-400" />}
+      title={`${hero.name} Skill Tree`}
+      description="Permanent combat passive enhancements"
+    >
+      <div className="space-y-3">
         {/* Skill Nodes List */}
-        <div className="space-y-3 mb-4">
+        <div className="space-y-2.5 max-h-[46vh] overflow-y-auto pr-0.5">
           {skillTree.nodes.map((node) => {
             const isMax = node.currentLevel >= node.maxLevel;
             const canAfford = gold >= node.goldCostNextLevel;
 
             return (
-              <div
+              <Card
                 key={node.id}
-                className="bg-slate-950/80 rounded-xl p-3 border border-slate-800 flex flex-col gap-2 transition hover:border-slate-700 shadow-sm"
+                variant="base"
+                padding="sm"
+                className="flex flex-col gap-2"
               >
                 {/* Top: Icon + Name + Level */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-xl shadow-inner">
-                      {node.icon}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-cyan-400 shrink-0">
+                      <Sparkles size={16} aria-hidden="true" />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-slate-100">{node.name}</span>
-                        <span className="text-[10px] font-mono text-yellow-400 font-bold">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-slate-100 truncate">{node.name}</span>
+                        <span className="text-xs font-mono text-yellow-400 font-bold">
                           Lv.{node.currentLevel}/{node.maxLevel}
                         </span>
                       </div>
-                      <p className="text-[10px] text-slate-400 leading-snug">{node.description}</p>
+                      <p className="text-xs text-slate-400 truncate">{node.description}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Bonus Description */}
-                <div className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20 font-medium">
+                <div className="text-xs text-emerald-300 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-500/20 font-medium">
                   {node.bonusDescription}
                 </div>
 
@@ -106,10 +99,10 @@ export const SkillTreeModal: React.FC = () => {
                     {Array.from({ length: node.maxLevel }).map((_, idx) => (
                       <div
                         key={idx}
-                        className={`w-3.5 h-1.5 rounded-full transition-all ${
+                        className={`w-3.5 h-1.5 rounded-full ${
                           idx < node.currentLevel
-                            ? 'bg-yellow-400 shadow-sm shadow-yellow-400/50'
-                            : 'bg-slate-850'
+                            ? 'bg-amber-400'
+                            : 'bg-slate-800'
                         }`}
                       />
                     ))}
@@ -117,30 +110,31 @@ export const SkillTreeModal: React.FC = () => {
 
                   {/* Action button */}
                   {!isMax ? (
-                    <button
+                    <Button
+                      size="sm"
+                      variant="accent"
                       onClick={() => handleUpgrade(node)}
                       disabled={!canAfford || isUpgrading}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ${
-                        canAfford && !isUpgrading
-                          ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-950 hover:brightness-110 active:scale-95 shadow-sm'
-                          : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                      }`}
                     >
-                      <ArrowUpCircle size={12} />
-                      <span>{node.goldCostNextLevel.toLocaleString()}🪙 Upgrade</span>
-                    </button>
+                      <Coins size={11} className="mr-1" aria-hidden="true" />
+                      <span>{node.goldCostNextLevel.toLocaleString()} Upgrade</span>
+                    </Button>
                   ) : (
-                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 size={12} /> MAX
+                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                      <CheckCircle2 size={13} aria-hidden="true" /> MAX
                     </span>
                   )}
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
+
+        <Button variant="secondary" fullWidth onClick={closeModal}>
+          Close
+        </Button>
       </div>
-    </div>
+    </ModalShell>
   );
 };
 
@@ -156,7 +150,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'iron_wall',
             name: 'Iron Wall',
             description: 'Reinforces armor and reduces incoming damage.',
-            icon: '🛡️',
+            icon: 'Shield',
             maxLevel: 5,
             currentLevel: skills['iron_wall'] || 0,
             goldCostNextLevel: 500 * ((skills['iron_wall'] || 0) + 1),
@@ -166,7 +160,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'berserk_strike',
             name: 'Berserk Strike',
             description: 'Boosts physical attack power and drains enemy life.',
-            icon: '🩸',
+            icon: 'Activity',
             maxLevel: 5,
             currentLevel: skills['berserk_strike'] || 0,
             goldCostNextLevel: 500 * ((skills['berserk_strike'] || 0) + 1),
@@ -176,7 +170,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'whirlwind_slash',
             name: 'Whirlwind Slash',
             description: 'Sweeping cleave dealing massive critical damage.',
-            icon: '🌪️',
+            icon: 'Zap',
             maxLevel: 5,
             currentLevel: skills['whirlwind_slash'] || 0,
             goldCostNextLevel: 500 * ((skills['whirlwind_slash'] || 0) + 1),
@@ -194,7 +188,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'eagle_eye',
             name: 'Eagle Eye',
             description: 'Sharpens eyesight, boosting Critical Rate and Attack Speed.',
-            icon: '🦅',
+            icon: 'Target',
             maxLevel: 5,
             currentLevel: skills['eagle_eye'] || 0,
             goldCostNextLevel: 500 * ((skills['eagle_eye'] || 0) + 1),
@@ -204,7 +198,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'venom_arrow',
             name: 'Venom Arrow',
             description: 'Enchants arrows with poison and increases dodge chance.',
-            icon: '🏹',
+            icon: 'Droplet',
             maxLevel: 5,
             currentLevel: skills['venom_arrow'] || 0,
             goldCostNextLevel: 500 * ((skills['venom_arrow'] || 0) + 1),
@@ -214,7 +208,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'deadly_sniping',
             name: 'Deadly Sniping',
             description: 'Armor-piercing sniping shot dealing lethal critical damage.',
-            icon: '🎯',
+            icon: 'Zap',
             maxLevel: 5,
             currentLevel: skills['deadly_sniping'] || 0,
             goldCostNextLevel: 500 * ((skills['deadly_sniping'] || 0) + 1),
@@ -232,7 +226,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'mana_flow',
             name: 'Mana Flow',
             description: 'Amplifies magic power and accelerates cooldown recovery.',
-            icon: '🔮',
+            icon: 'Sparkles',
             maxLevel: 5,
             currentLevel: skills['mana_flow'] || 0,
             goldCostNextLevel: 500 * ((skills['mana_flow'] || 0) + 1),
@@ -242,7 +236,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'pyroblast',
             name: 'Pyroblast',
             description: 'Summons devastating fireballs and enhances spell evasion.',
-            icon: '🔥',
+            icon: 'Flame',
             maxLevel: 5,
             currentLevel: skills['pyroblast'] || 0,
             goldCostNextLevel: 500 * ((skills['pyroblast'] || 0) + 1),
@@ -252,7 +246,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'void_blizzard',
             name: 'Void Blizzard',
             description: 'Unleashes an abyssal blizzard increasing overall damage.',
-            icon: '❄️',
+            icon: 'Snowflake',
             maxLevel: 5,
             currentLevel: skills['void_blizzard'] || 0,
             goldCostNextLevel: 500 * ((skills['void_blizzard'] || 0) + 1),
@@ -270,7 +264,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'divine_aura',
             name: 'Divine Aura',
             description: 'Radiates holy light, regenerating HP and shielding the party.',
-            icon: '✨',
+            icon: 'Sun',
             maxLevel: 5,
             currentLevel: skills['divine_aura'] || 0,
             goldCostNextLevel: 500 * ((skills['divine_aura'] || 0) + 1),
@@ -280,7 +274,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'purification',
             name: 'Purification',
             description: 'Cleanses darkness and grants Chaos resistance.',
-            icon: '🕯️',
+            icon: 'Sparkles',
             maxLevel: 5,
             currentLevel: skills['purification'] || 0,
             goldCostNextLevel: 500 * ((skills['purification'] || 0) + 1),
@@ -290,7 +284,7 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
             id: 'eternal_blessing',
             name: 'Eternal Blessing',
             description: 'Empowers vitality, boosting Max HP and all Elemental Resistances.',
-            icon: '💖',
+            icon: 'Heart',
             maxLevel: 5,
             currentLevel: skills['eternal_blessing'] || 0,
             goldCostNextLevel: 500 * ((skills['eternal_blessing'] || 0) + 1),

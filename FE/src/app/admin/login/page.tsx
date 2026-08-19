@@ -100,7 +100,9 @@ export default function AdminLoginPage() {
           <div>
             <label className="text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
               <span>Username</span>
-              <span className="text-[10px] text-slate-500 font-mono">superadmin</span>
+              {process.env.NODE_ENV !== 'production' && (
+                <span className="text-[10px] text-slate-500 font-mono">superadmin (dev)</span>
+              )}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -120,7 +122,9 @@ export default function AdminLoginPage() {
           <div>
             <label className="text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
               <span>Password</span>
-              <span className="text-[10px] text-slate-500 font-mono">adminpassword123</span>
+              {process.env.NODE_ENV !== 'production' && (
+                <span className="text-[10px] text-slate-500 font-mono">adminpassword123 (dev)</span>
+              )}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -149,14 +153,16 @@ export default function AdminLoginPage() {
               <span>Remember session</span>
             </label>
 
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>Fill Credentials</span>
-            </button>
+            {process.env.NODE_ENV !== 'production' && (
+              <button
+                type="button"
+                onClick={handleFillDemo}
+                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
+              >
+                <Key className="w-3.5 h-3.5" />
+                <span>Fill Dev Credentials</span>
+              </button>
+            )}
           </div>
 
           {/* Submit Button */}

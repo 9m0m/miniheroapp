@@ -5,6 +5,8 @@ import com.worldhero.dto.ItemInstanceDto;
 import com.worldhero.dto.ItemTemplateDto;
 import com.worldhero.dto.SmartFusionRequestDto;
 import com.worldhero.dto.StatsDto;
+import com.worldhero.dto.Transmute9RequestDto;
+import com.worldhero.dto.Transmute9ResponseDto;
 import com.worldhero.engine.CubeEngine;
 import com.worldhero.engine.StatEvaluator;
 import com.worldhero.exception.GameRuleViolationException;
@@ -37,15 +39,34 @@ public class CubeServiceImpl implements CubeService {
     private final CubeEngine cubeEngine;
     private final StatEvaluator statEvaluator;
 
+    private ItemInstanceEntity findUserItemSafely(UserEntity user, String itemIdStr) {
+        ItemInstanceEntity instance = null;
+        try {
+            UUID itemUuid = UUID.fromString(itemIdStr);
+            instance = itemInstanceRepository.findById(itemUuid).orElse(null);
+        } catch (IllegalArgumentException ignored) {}
+
+        if (instance == null) {
+            List<ItemInstanceEntity> userItems = itemInstanceRepository.findBagItemsWithTemplateByUserId(user.getId());
+            instance = userItems.stream()
+                    .filter(i -> i.getTemplate().getId().equalsIgnoreCase(itemIdStr) || i.getId().toString().equalsIgnoreCase(itemIdStr))
+                    .findFirst()
+                    .orElse(null);
+        }
+        return instance;
+    }
+
     @Override
     @Transactional
     public ItemInstanceDto smartFusion(SmartFusionRequestDto request) {
         UserEntity user = userService.getUserOrThrow(request.getUserId());
 
         List<ItemInstanceEntity> inputItems = new ArrayList<>();
-        for (UUID itemId : request.getItemInstanceIds()) {
-            ItemInstanceEntity item = itemInstanceRepository.findById(itemId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Vật phẩm không tồn tại: " + itemId));
+        for (String itemId : request.getItemInstanceIds()) {
+            ItemInstanceEntity item = findUserItemSafely(user, itemId);
+            if (item == null) {
+                throw new ResourceNotFoundException("Vật phẩm không tồn tại: " + itemId);
+            }
 
             if (!item.getUser().getId().equals(user.getId())) {
                 throw new GameRuleViolationException("Vật phẩm không thuộc sở hữu của người chơi.");
@@ -57,8 +78,8 @@ public class CubeServiceImpl implements CubeService {
         }
 
         ItemRarity baseRarity = inputItems.get(0).getCurrentRarity();
-        if (baseRarity == ItemRarity.LEGENDARY) {
-            throw new GameRuleViolationException("Trang bị Huyền Thoại (Legendary) đã đạt phẩm cấp tối đa!");
+        if (baseRarity == ItemRarity.ANCIENT) {
+            throw new GameRuleViolationException("Trang bị Cổ Đại (Ancient) đã đạt phẩm cấp tối đa!");
         }
 
         for (ItemInstanceEntity item : inputItems) {
@@ -67,13 +88,14 @@ public class CubeServiceImpl implements CubeService {
             }
         }
 
-        // Fusion Cost in Gold
         long costGold = switch (baseRarity) {
             case COMMON -> 200L;
             case UNCOMMON -> 500L;
             case RARE -> 1500L;
             case EPIC -> 5000L;
-            case LEGENDARY -> 0L;
+            case LEGENDARY -> 15000L;
+            case MYTHIC -> 50000L;
+            case ANCIENT -> 0L;
         };
 
         if (user.getGold() < costGold) {
@@ -83,18 +105,15 @@ public class CubeServiceImpl implements CubeService {
         user.setGold(user.getGold() - costGold);
         userRepository.save(user);
 
-        // Calculate Result
         ItemRarity nextRarity = baseRarity.getNextTier();
         int avgILvl = (int) Math.round(inputItems.stream().mapToInt(ItemInstanceEntity::getItemLevel).average().orElse(1));
         var targetTemplate = inputItems.get(0).getTemplate();
 
-        // Destroy 3 input materials
         itemInstanceRepository.deleteAll(inputItems);
 
-        // Create 1 new fused item
         ItemInstanceEntity fusedItem = ItemInstanceEntity.builder()
                 .user(user)
-                .hero(null) // in bag
+                .hero(null)
                 .equippedSlot(null)
                 .template(targetTemplate)
                 .itemLevel(avgILvl)
@@ -114,6 +133,102 @@ public class CubeServiceImpl implements CubeService {
         resultDto.setComputedStats(stats);
 
         return resultDto;
+    }
+
+    @Override
+    @Transactional
+    public Transmute9ResponseDto transmuteCube9(Transmute9RequestDto request) {
+        UserEntity user = userService.getUserOrThrow(request.getUserId());
+
+        if (request.getItemInstanceIds() == null || request.getItemInstanceIds().size() != 9) {
+            throw new GameRuleViolationException("Ma trận The Cube 9 món yêu cầu chính xác 9 vật phẩm!");
+        }
+
+        List<ItemInstanceEntity> inputItems = new ArrayList<>();
+        for (String itemId : request.getItemInstanceIds()) {
+            ItemInstanceEntity item = findUserItemSafely(user, itemId);
+            if (item == null) {
+                throw new ResourceNotFoundException("Vật phẩm không tồn tại: " + itemId);
+            }
+
+            if (!item.getUser().getId().equals(user.getId())) {
+                throw new GameRuleViolationException("Vật phẩm không thuộc sở hữu của người chơi.");
+            }
+            if (item.getHero() != null) {
+                throw new GameRuleViolationException("Không thể ghép trang bị đang được Tướng sử dụng. Vui lòng tháo đồ trước!");
+            }
+            inputItems.add(item);
+        }
+
+        ItemRarity baseRarity = inputItems.get(0).getCurrentRarity();
+        if (baseRarity == ItemRarity.ANCIENT) {
+            throw new GameRuleViolationException("Trang bị Cổ Đại (Ancient) đã đạt phẩm cấp tối cao nhất!");
+        }
+
+        for (ItemInstanceEntity item : inputItems) {
+            if (item.getCurrentRarity() != baseRarity) {
+                throw new GameRuleViolationException("Cả 9 vật phẩm đưa vào The Cube phải có cùng phẩm cấp!");
+            }
+        }
+
+        long costGold = switch (baseRarity) {
+            case COMMON -> 300L;
+            case UNCOMMON -> 800L;
+            case RARE -> 2500L;
+            case EPIC -> 8000L;
+            case LEGENDARY -> 25000L;
+            case MYTHIC -> 80000L;
+            case ANCIENT -> 0L;
+        };
+
+        if (user.getGold() < costGold) {
+            throw new InsufficientResourceException("Không đủ Gold để kích hoạt Ma trận The Cube! Cần: " + costGold + ", Hiện có: " + user.getGold());
+        }
+
+        user.setGold(user.getGold() - costGold);
+        userRepository.save(user);
+
+        CubeEngine.TransmuteResult rates = cubeEngine.calculateTransmuteRates(baseRarity);
+        ItemRarity targetRarity = rates.targetRarity;
+        int avgILvl = (int) Math.round(inputItems.stream().mapToInt(ItemInstanceEntity::getItemLevel).average().orElse(1));
+        var targetTemplate = inputItems.get(0).getTemplate();
+
+        itemInstanceRepository.deleteAll(inputItems);
+
+        ItemInstanceEntity transmutedItem = ItemInstanceEntity.builder()
+                .user(user)
+                .hero(null)
+                .equippedSlot(null)
+                .template(targetTemplate)
+                .itemLevel(avgILvl)
+                .currentRarity(targetRarity)
+                .enhanceLevel(0)
+                .sockets("[]")
+                .subStats("{}")
+                .build();
+
+        transmutedItem = itemInstanceRepository.save(transmutedItem);
+        log.info("🎲 The Cube 9-Item Matrix SUCCESS: Transmuted 9 {} items into {} ({}) [Jackpot={}, Fallback={}] for User {}",
+                baseRarity, targetTemplate.getName(), targetRarity, rates.isJackpot, rates.isFallback, user.getId());
+
+        ItemTemplateDto templateDto = transmutedItem.getTemplate().toTemplateDto();
+        ItemInstanceDto resultDto = transmutedItem.toInstanceDto();
+        StatsDto stats = statEvaluator.computeItemStats(templateDto, resultDto);
+        resultDto.setComputedStats(stats);
+
+        String message = rates.isJackpot
+                ? "🌟 JACKPOT TRANSMUTATION! Bạn đã nhảy vọt lên phẩm cấp " + targetRarity.getDisplayName() + "!"
+                : rates.isFallback
+                ? "⚠️ Phẩm cấp giữ nguyên ở mức " + targetRarity.getDisplayName() + "."
+                : "✨ Ghép thành công 9 món lên " + targetRarity.getDisplayName() + "!";
+
+        return Transmute9ResponseDto.builder()
+                .resultItem(resultDto)
+                .isJackpot(rates.isJackpot)
+                .isFallback(rates.isFallback)
+                .remainingGold(user.getGold())
+                .message(message)
+                .build();
     }
 
     @Override

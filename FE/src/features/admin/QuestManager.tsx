@@ -6,17 +6,8 @@ import { QuestTemplateEntity, QuestType, QuestActionType } from '@/types/quest.t
 import { Award, Plus, Edit2, Trash2, CheckCircle, XCircle, Sparkles, RefreshCw, Save, X, Calendar, Flame } from 'lucide-react';
 
 const ACTION_TYPE_LABELS: Record<QuestActionType, string> = {
-  MONSTER_KILL: '⚔️ Monster Kill (Normal & Boss)',
-  WAVE_CLEAR: '🌊 Wave Clear',
-  BOSS_KILL_W31: '👑 Stage Boss Kill (Wave 31)',
-  EQUIPMENT_ENHANCE: '🔨 Equipment Enhancement',
   CHEST_OPEN: '🎁 Open Loot Chest',
-  CUBE_FUSION: '🎲 Horadric Cube Fusion',
-  ALCHEMY_BREW: '🔮 Alchemy Ward Scroll Brew',
-  SKILL_UPGRADE: '⚡ Hero Skill Upgrade',
-  GEM_SOCKET: '💎 Gem Socket / Transmute',
   TRIAL_RUN: '🎯 Arena Trial Run (DPS / Speedrun)',
-  GOLD_EARNED: '💰 Gold Earned / Piggy Bank',
 };
 
 export const QuestManager: React.FC = () => {
@@ -118,10 +109,10 @@ export const QuestManager: React.FC = () => {
               setEditingQuest({
                 title: '',
                 description: '',
-                icon: '⚔️',
+                icon: '🎁',
                 questType: 'DAILY',
-                actionType: 'MONSTER_KILL',
-                targetCount: 10,
+                actionType: 'CHEST_OPEN',
+                targetCount: 2,
                 activityPoints: 20,
                 goldReward: 500,
                 gemsReward: 10,
@@ -332,7 +323,7 @@ export const QuestManager: React.FC = () => {
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-300 mb-1">Action Type</label>
                   <select
-                    value={editingQuest.actionType || 'MONSTER_KILL'}
+                    value={editingQuest.actionType || 'CHEST_OPEN'}
                     onChange={(e) => setEditingQuest({ ...editingQuest, actionType: e.target.value as QuestActionType })}
                     className="w-full bg-[#161C28] border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
                   >

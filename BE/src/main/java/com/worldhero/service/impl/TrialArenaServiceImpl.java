@@ -82,7 +82,7 @@ public class TrialArenaServiceImpl implements TrialArenaService {
                         .trialType(request.getTrialType())
                         .periodKey(weeklyKey)
                         .score(request.getTrialType() == TrialType.DPS_30S ? 0.0 : 9999.0)
-                        .isBuildPublic(true)
+                        .isBuildPublic(false)
                         .build());
 
         boolean isNewBest = false;
@@ -190,7 +190,7 @@ public class TrialArenaServiceImpl implements TrialArenaService {
             recordOpt = trialRecordRepository.findByUserIdAndTrialTypeAndPeriodKey(targetUserId, TrialType.BOSS_SPEEDRUN, weeklyKey);
         }
 
-        boolean isPublic = recordOpt.map(TrialRecordEntity::isBuildPublic).orElse(true);
+        boolean isPublic = recordOpt.map(TrialRecordEntity::isBuildPublic).orElse(false);
 
         if (!isPublic && !isAdmin) {
             return BuildInspectResponseDto.builder()

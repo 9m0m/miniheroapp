@@ -13,4 +13,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByWorldIdHash(String worldIdHash);
 
     Optional<UserEntity> findFirstByOrderByCreatedAtAsc();
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM UserEntity u WHERE u.id = :id")
+    Optional<UserEntity> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") UUID id);
 }

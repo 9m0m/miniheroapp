@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { Hero, ItemInstance, ItemSlot } from '../types/game.types';
+import { Hero, ItemInstance, ItemSlot, HeroClass } from '../types/game.types';
 
 export const heroApi = {
   /**
@@ -28,19 +28,38 @@ export const heroApi = {
         });
       }
 
+      const templateId = h.heroTemplateId || h.templateId || (h.heroClass === 'WARRIOR' ? 'hero.warrior' : h.heroClass === 'RANGER' ? 'hero.ranger' : h.heroClass === 'MAGE' ? 'hero.wizard' : 'hero.priest');
+      const role = h.role || (h.heroClass === 'WARRIOR' ? 'BRUISER' : h.heroClass === 'RANGER' ? 'MARKSMAN' : h.heroClass === 'MAGE' ? 'MAGE' : 'SUPPORT');
+
       return {
         id: h.id,
-        name: getHeroNameByClass(h.heroClass),
-        heroClass: h.heroClass,
-        level: h.level,
-        exp: h.exp,
-        currentHp: h.computedStats?.maxHp || 100,
+        name: h.heroClass ? getHeroNameByClass(h.heroClass) : (h.name || templateId),
+        heroClass: h.heroClass || null,
+        templateId,
+        role,
+        level: h.level || 1,
+        stars: h.stars || 1,
+        shards: h.shards || 0,
+        exp: h.exp || 0,
+        currentHp: h.computedStats?.maxHp || (h.towerStats?.maxHp ? h.towerStats.maxHp : 150),
         equipment: equipmentMap,
         skillPoints: 0,
+        skills: h.skills || {},
         computedStats: h.computedStats,
+        towerStats: h.towerStats,
         liveDps: h.liveDps,
       };
     });
+  },
+
+  /**
+   * Hồi sinh ngay lập tức 1 Tướng bằng 10 Gems (Server-Authoritative)
+   */
+  reviveHero: async (heroClass: HeroClass, userId?: string): Promise<{ remainingGems: number; cost: number; message: string }> => {
+    const res = await apiClient.post<any>('/heroes/revive', { heroClass }, {
+      params: userId ? { userId } : {},
+    });
+    return res.data;
   },
 };
 

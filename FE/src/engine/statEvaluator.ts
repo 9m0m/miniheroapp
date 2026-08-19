@@ -1,4 +1,7 @@
-import { Stats, ItemTemplate, ItemInstance, ItemRarity, GemType } from '../types/game.types';
+import { Stats } from '../types/stats.types';
+import { ItemTemplate, ItemInstance } from '../types/item.types';
+import { ItemRarity, GemType } from '../types/enums';
+import { Hero } from '../types/hero.types';
 
 export const RARITY_MULTIPLIERS: Record<ItemRarity, number> = {
   COMMON: 1.0,
@@ -6,6 +9,8 @@ export const RARITY_MULTIPLIERS: Record<ItemRarity, number> = {
   RARE: 1.6,
   EPIC: 2.1,
   LEGENDARY: 3.0,
+  MYTHIC: 4.2,
+  ANCIENT: 6.0,
 };
 
 export const ENHANCE_GROWTH_PER_LEVEL = 0.10; // +10% per +1 level
@@ -17,7 +22,7 @@ export function createDefaultStats(): Stats {
     atkPercent: 0,
     atkSpeed: 1.0,
     critRate: 5.0,
-    critDmg: 150.0,
+    critDmg: 50.0,
     elemDmgBonus: 0,
     maxHp: 100,
     armor: 0,
@@ -38,7 +43,7 @@ export function createDefaultStats(): Stats {
 }
 
 export function computeItemStats(template: ItemTemplate, instance: ItemInstance): Stats {
-  const base = { ...createDefaultStats(), ...(template.baseStats || {}) };
+  const base = template.baseStats || {};
   const rarityMult = RARITY_MULTIPLIERS[instance.rarity] || 1.0;
   const iLvlMult = 1.0 + (Math.max(1, instance.itemLevel) - 1) * (template.iLvlScalingFactor || 0.08);
   const enhanceMult = 1.0 + instance.enhanceLevel * ENHANCE_GROWTH_PER_LEVEL;
@@ -46,12 +51,28 @@ export function computeItemStats(template: ItemTemplate, instance: ItemInstance)
   const totalScale = rarityMult * iLvlMult * enhanceMult;
 
   const computed: Stats = {
-    ...base,
-    physAtk: Math.round(base.physAtk * totalScale),
-    magicAtk: Math.round(base.magicAtk * totalScale),
-    maxHp: Math.round(base.maxHp * totalScale),
-    armor: Math.round(base.armor * totalScale),
-    hpRegen: Math.round(base.hpRegen * totalScale),
+    physAtk: Math.round((base.physAtk || 0) * totalScale),
+    magicAtk: Math.round((base.magicAtk || 0) * totalScale),
+    atkPercent: base.atkPercent || 0,
+    atkSpeed: base.atkSpeed || 0,
+    critRate: base.critRate || 0,
+    critDmg: base.critDmg || 0,
+    elemDmgBonus: base.elemDmgBonus || 0,
+    maxHp: Math.round((base.maxHp || 0) * totalScale),
+    armor: Math.round((base.armor || 0) * totalScale),
+    dmgReduction: base.dmgReduction || 0,
+    hpRegen: Math.round((base.hpRegen || 0) * totalScale),
+    lifeSteal: base.lifeSteal || 0,
+    physDodge: base.physDodge || 0,
+    spellEvasion: base.spellEvasion || 0,
+    fireRes: base.fireRes || 0,
+    coldRes: base.coldRes || 0,
+    lightningRes: base.lightningRes || 0,
+    chaosRes: base.chaosRes || 0,
+    cdr: base.cdr || 0,
+    goldBonus: base.goldBonus || 0,
+    chestDropBonus: base.chestDropBonus || 0,
+    expBonus: base.expBonus || 0,
   };
 
   // Add Sub-stats
@@ -111,6 +132,25 @@ export function evaluateBlessingStats(blessingId: string): Partial<Stats> {
   return {};
 }
 
+export function evaluateHeroLiveStats(hero: Hero, templates: Record<string, ItemTemplate>, baseStats?: Stats): Stats {
+  const total = baseStats ? { ...baseStats } : createDefaultStats();
+
+  if (hero && hero.equipment) {
+    Object.values(hero.equipment).forEach((itemInstance) => {
+      if (itemInstance) {
+        const tpl = templates[itemInstance.templateId];
+        if (tpl) {
+          const itemStats = computeItemStats(tpl, itemInstance);
+          addStats(total, itemStats);
+        }
+      }
+    });
+  }
+
+  clampStats(total);
+  return total;
+}
+
 export function addStats(target: Stats, addition: Partial<Stats>) {
   for (const key of Object.keys(addition) as (keyof Stats)[]) {
     if (addition[key] !== undefined) {
@@ -121,7 +161,7 @@ export function addStats(target: Stats, addition: Partial<Stats>) {
 
 export function clampStats(stats: Stats) {
   stats.critRate = Math.min(100, Math.max(0, stats.critRate));
-  stats.critDmg = Math.max(100, stats.critDmg);
+  stats.critDmg = Math.max(50, stats.critDmg);
   stats.dmgReduction = Math.min(75, Math.max(0, stats.dmgReduction));
   stats.physDodge = Math.min(75, Math.max(0, stats.physDodge));
   stats.spellEvasion = Math.min(75, Math.max(0, stats.spellEvasion));

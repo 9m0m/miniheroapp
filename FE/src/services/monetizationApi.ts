@@ -33,16 +33,6 @@ export const monetizationApi = {
   },
 
   /**
-   * Rút cổ tức Quỹ Thám Hiểm khi vượt qua các mốc Stage 10, 20, 30, 40.
-   */
-  claimGrowthFund: async (userId: string, stageMilestone: number): Promise<UserProfile> => {
-    const res = await apiClient.post<UserProfile>('/monetization/claim-growth-fund', null, {
-      params: { userId, stageMilestone },
-    });
-    return res.data;
-  },
-
-  /**
    * Mô phỏng thanh toán WLD qua MiniKit Sandbox.
    */
   mockWldPay: async (userId: string, featureKey: string, amountWld: number): Promise<UserProfile> => {

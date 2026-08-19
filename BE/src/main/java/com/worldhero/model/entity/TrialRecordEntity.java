@@ -54,7 +54,7 @@ public class TrialRecordEntity {
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean isBuildPublic = true;
+    private boolean isBuildPublic = false;
 
     @Builder.Default
     @Column(nullable = false)

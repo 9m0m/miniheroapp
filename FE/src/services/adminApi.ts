@@ -2,12 +2,8 @@ import { apiClient } from './client';
 import {
   AdminAuthResponse,
   AdminDashboardStats,
-  BattleSimulationRequest,
-  BattleSimulationResult,
   ItemTemplate,
-  MonsterTemplate,
   SkillConfig,
-  StageDetailConfig,
 } from '@/types/game.types';
 
 const ADMIN_TOKEN_KEY = 'wh_admin_session_token';
@@ -54,52 +50,6 @@ export const adminApi = {
     return res.data;
   },
 
-  // Monster Templates
-  getAllMonsters: async (): Promise<MonsterTemplate[]> => {
-    const res = await apiClient.get<MonsterTemplate[]>('/admin/monsters');
-    return res.data;
-  },
-
-  getMonsterById: async (id: string): Promise<MonsterTemplate> => {
-    const res = await apiClient.get<MonsterTemplate>(`/admin/monsters/${id}`);
-    return res.data;
-  },
-
-  createMonster: async (data: Partial<MonsterTemplate>): Promise<MonsterTemplate> => {
-    const res = await apiClient.post<MonsterTemplate>('/admin/monsters', data);
-    return res.data;
-  },
-
-  updateMonster: async (id: string, data: Partial<MonsterTemplate>): Promise<MonsterTemplate> => {
-    const res = await apiClient.put<MonsterTemplate>(`/admin/monsters/${id}`, data);
-    return res.data;
-  },
-
-  saveMonster: async (data: MonsterTemplate): Promise<MonsterTemplate> => {
-    if (data.id) {
-      const res = await apiClient.put<MonsterTemplate>(`/admin/monsters/${data.id}`, data);
-      return res.data;
-    } else {
-      const res = await apiClient.post<MonsterTemplate>('/admin/monsters', data);
-      return res.data;
-    }
-  },
-
-  deleteMonster: async (id: string): Promise<void> => {
-    await apiClient.delete(`/admin/monsters/${id}`);
-  },
-
-  // Stage Waves & Drop Table Configuration
-  getStageDetailConfig: async (world: number, stage: number): Promise<StageDetailConfig> => {
-    const res = await apiClient.get<StageDetailConfig>(`/admin/stages/${world}/${stage}`);
-    return res.data;
-  },
-
-  updateStageDetailConfig: async (world: number, stage: number, data: StageDetailConfig): Promise<StageDetailConfig> => {
-    const res = await apiClient.put<StageDetailConfig>(`/admin/stages/${world}/${stage}`, data);
-    return res.data;
-  },
-
   // Master Item Templates
   getAllItemTemplates: async (): Promise<ItemTemplate[]> => {
     const res = await apiClient.get<ItemTemplate[]>('/admin/item-templates');
@@ -122,9 +72,4 @@ export const adminApi = {
     return res.data;
   },
 
-  // Live Battle Math Simulation
-  simulateBattle: async (params: BattleSimulationRequest): Promise<BattleSimulationResult> => {
-    const res = await apiClient.post<BattleSimulationResult>('/admin/simulate-battle', params);
-    return res.data;
-  },
 };

@@ -1,5 +1,6 @@
 package com.worldhero.controller;
 
+import com.worldhero.config.security.UserPrincipal;
 import com.worldhero.dto.EnhanceRequestDto;
 import com.worldhero.dto.EnhanceResponseDto;
 import com.worldhero.service.EnhanceService;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +25,13 @@ public class EnhanceController {
 
     @PostMapping("/enhance")
     @Operation(summary = "Cường hóa trang bị (+1 -> +15) tiêu Gold + Đá, hỗ trợ Bùa Bảo Hiểm WLD")
-    public ResponseEntity<EnhanceResponseDto> enhanceItem(@Valid @RequestBody EnhanceRequestDto request) {
+    public ResponseEntity<EnhanceResponseDto> enhanceItem(
+            @Valid @RequestBody EnhanceRequestDto request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        if (principal != null && principal.getId() != null) {
+            request.setUserId(principal.getId());
+        }
         return ResponseEntity.ok(enhanceService.enhanceItem(request));
     }
 }

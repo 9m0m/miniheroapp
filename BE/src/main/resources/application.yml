@@ -2,12 +2,23 @@ spring:
   application:
     name: world-hero-backend
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   main:
     banner-mode: console
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+  worldcoin:
+    app-id: ${WORLD_APP_ID:app_staging_world_hero_2026}
+    action: ${WORLD_ACTION:world-hero-login}
+    verify-url: ${WORLD_VERIFY_URL:https://developer.worldcoin.org/api/v2/verify}
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001}
 
 springdoc:
   api-docs:
@@ -15,3 +26,25 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+
+core:
+  v2:
+    enabled: ${CORE_V2_ENABLED:true}
+
+tower:
+  v2:
+    enabled: ${TOWER_V2_ENABLED:true}
+  progress:
+    enabled: ${TOWER_PROGRESS_ENABLED:true}
+  reward:
+    enabled: ${TOWER_REWARD_ENABLED:true}
+  paid:
+    enabled: ${TOWER_PAID_ENABLED:true}
+
+recruitment:
+  paid:
+    enabled: ${RECRUITMENT_PAID_ENABLED:true}
+
+expedition:
+  paid-slots:
+    enabled: ${EXPEDITION_PAID_SLOTS_ENABLED:true}

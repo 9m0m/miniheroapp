@@ -9,8 +9,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#0B0E14",
 };
 
@@ -22,7 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased bg-[#07090E] text-slate-100 min-h-screen">
-        {children}
+        <div id="app-root" className="min-h-screen flex flex-col">
+          {children}
+        </div>
+        <div id="dialog-root" />
       </body>
     </html>
   );

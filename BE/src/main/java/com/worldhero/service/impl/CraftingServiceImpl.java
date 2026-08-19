@@ -135,7 +135,7 @@ public class CraftingServiceImpl implements CraftingService {
                 .hero(null) // in bag
                 .equippedSlot(null)
                 .template(template)
-                .itemLevel(Math.max(1, user.getCurrentStage()))
+                .itemLevel(1)
                 .currentRarity(template.getBaseRarity())
                 .enhanceLevel(0)
                 .sockets("[]")

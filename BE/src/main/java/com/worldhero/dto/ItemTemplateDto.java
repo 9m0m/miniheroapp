@@ -4,6 +4,7 @@ import com.worldhero.model.enums.ElementalType;
 import com.worldhero.model.enums.HeroClass;
 import com.worldhero.model.enums.ItemRarity;
 import com.worldhero.model.enums.ItemSlot;
+import com.worldhero.model.enums.ItemType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class ItemTemplateDto {
     private String description;
     private String iconUrl;
 
+    private ItemType itemType;
     private ItemSlot slot;
     private HeroClass requiredClass;       // null = Universal Accessory
     private ItemRarity baseRarity;

@@ -17,17 +17,22 @@ export interface EnhanceResult {
 
 export const upgradeApi = {
   /**
-   * Cường hóa trang bị (+0 đến +15) với tùy chọn Bùa Bảo Hiểm Lucky Forge.
+   * Cường hóa trang bị (+0 đến +15) với tùy chọn Bùa Bảo Hiểm Lucky Forge và operationKey bắt buộc.
    */
   enhanceItem: async (
     userId: string,
     itemInstanceId: string,
-    useInsurance: boolean
+    useInsurance: boolean,
+    operationKey: string
   ): Promise<EnhanceResult> => {
+    if (!operationKey || operationKey.trim() === '') {
+      throw new Error('upgradeApi.enhanceItem requires a non-empty operationKey for idempotency.');
+    }
     const res = await apiClient.post<EnhanceResult>('/upgrade/enhance', {
       userId,
       itemInstanceId,
       useInsurance,
+      operationKey,
     });
     return res.data;
   },

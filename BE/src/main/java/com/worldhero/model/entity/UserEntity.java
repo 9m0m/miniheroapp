@@ -25,6 +25,9 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Version
+    private Long version;
+
     @Column(name = "world_id_hash", unique = true, length = 255)
     private String worldIdHash;
 
@@ -45,22 +48,25 @@ public class UserEntity {
     @Builder.Default
     private int enhanceStones = 20;
 
-    // Stage & Wave Progression
-    @Column(name = "current_world", nullable = false)
+    @Column(name = "essence", nullable = false)
     @Builder.Default
-    private int currentWorld = 1; // 1 to 4
+    private long essence = 0L;
 
-    @Column(name = "current_stage", nullable = false)
+    @Column(name = "hero_shards", nullable = false)
     @Builder.Default
-    private int currentStage = 1; // 1 to 10
+    private int heroShards = 0;
 
-    @Column(name = "current_wave", nullable = false)
+    @Column(name = "standard_summon_tickets", nullable = false)
     @Builder.Default
-    private int currentWave = 1; // 1 to 30
+    private int standardSummonTickets = 0;
 
-    @Column(name = "max_cleared_stage", nullable = false)
+    @Column(name = "inventory_slots")
     @Builder.Default
-    private int maxClearedStage = 0;
+    private Integer inventorySlots = 42; // Default 42 slots
+
+    public int getInventorySlots() {
+        return inventorySlots != null ? inventorySlots : 42;
+    }
 
     // Earning & Monetization Hooks (WLD)
     @Column(name = "piggy_bank_gems", nullable = false)
@@ -77,14 +83,6 @@ public class UserEntity {
 
     @Column(name = "login_last_claimed_at")
     private LocalDateTime loginLastClaimedAt;
-
-    @Column(name = "growth_fund_unlocked", nullable = false)
-    @Builder.Default
-    private boolean growthFundUnlocked = false;
-
-    @Column(name = "growth_fund_claimed_stages", nullable = false, columnDefinition = "TEXT")
-    @Builder.Default
-    private String growthFundClaimedStages = "[]"; // JSON array of claimed stages e.g. [10, 20]
 
     // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
