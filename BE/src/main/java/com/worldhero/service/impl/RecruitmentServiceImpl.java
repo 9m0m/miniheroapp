@@ -74,7 +74,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         RecruitmentBannerDto standardBanner = RecruitmentBannerDto.builder()
                 .bannerId("STANDARD")
                 .name("Standard Hero Summon")
-                .description("Summon powerful heroes across 6 classes to form your 3v3 party.")
+                .description("")
                 .type(BannerType.STANDARD)
                 .ticketCost(1)
                 .isPaid(false)
