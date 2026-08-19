@@ -149,19 +149,6 @@ export const TutorialSpotlightOverlay: React.FC = () => {
     };
   }, [isCoreV2, isWelcomeStep]);
 
-  // ── 3. Apply `inert` to background content during spotlight ─────────────
-  useEffect(() => {
-    if (!isCoreV2 || !step || step === 'COMPLETE' || step === 'WELCOME') return;
-    if (!config) return;
-
-    const container = document.getElementById('game-main-container');
-    if (!container) return;
-
-    // Mark all direct children of game-main-container as inert except the overlay
-    // (the overlay is rendered as a portal sibling of main, so we mark the whole main inert)
-    container.setAttribute('inert', '');
-    return () => container.removeAttribute('inert');
-  }, [isCoreV2, step, config]);
 
   // ── 4. Target rect measurement — scoped observers ───────────────────────
   useEffect(() => {
