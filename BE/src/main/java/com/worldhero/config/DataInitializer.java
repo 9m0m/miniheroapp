@@ -37,6 +37,12 @@ public class DataInitializer implements CommandLineRunner {
 
     private final Environment environment;
 
+    @org.springframework.beans.factory.annotation.Value("${app.admin.username:superadmin}")
+    private String adminUsername;
+
+    @org.springframework.beans.factory.annotation.Value("${app.admin.password:adminpassword123}")
+    private String adminPassword;
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -90,14 +96,14 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedSuperAdminUser() {
-        if (adminUserRepository.findByUsername("superadmin").isEmpty()) {
-            String encodedPassword = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("adminpassword123");
+        if (adminUserRepository.findByUsername(adminUsername).isEmpty()) {
+            String encodedPassword = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(adminPassword);
             adminUserRepository.save(com.worldhero.model.entity.AdminUserEntity.builder()
-                    .username("superadmin")
+                    .username(adminUsername)
                     .password(encodedPassword)
                     .role(com.worldhero.model.enums.AdminRole.ROLE_SUPERADMIN)
                     .build());
-            log.info("👑 Initialized SuperAdmin User ('superadmin') with BCrypt password in Database!");
+            log.info("👑 Initialized SuperAdmin User ('{}') with BCrypt password in Database!", adminUsername);
         }
     }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Lock, User, Key, ArrowRight, Gamepad2, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, User, ArrowRight, Gamepad2, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { adminApi, adminAuth } from '@/services/adminApi';
 
 export default function AdminLoginPage() {
@@ -42,12 +42,6 @@ export default function AdminLoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFillDemo = () => {
-    setUsername('superadmin');
-    setPassword('adminpassword123');
-    setErrorMsg(null);
   };
 
   return (
@@ -152,17 +146,6 @@ export default function AdminLoginPage() {
               />
               <span>Remember session</span>
             </label>
-
-            {process.env.NODE_ENV !== 'production' && (
-              <button
-                type="button"
-                onClick={handleFillDemo}
-                className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
-              >
-                <Key className="w-3.5 h-3.5" />
-                <span>Fill Dev Credentials</span>
-              </button>
-            )}
           </div>
 
           {/* Submit Button */}

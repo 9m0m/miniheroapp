@@ -19,7 +19,7 @@ public class AdminAuthController {
     private final AdminAuthService adminAuthService;
 
     @PostMapping("/login")
-    @Operation(summary = "Đăng nhập SuperAdmin (username: superadmin / password: adminpassword123)")
+    @Operation(summary = "Đăng nhập SuperAdmin LiveOps Portal")
     public ResponseEntity<AdminAuthResponseDto> login(@Valid @RequestBody AdminLoginRequestDto request) {
         return ResponseEntity.ok(adminAuthService.login(request));
     }

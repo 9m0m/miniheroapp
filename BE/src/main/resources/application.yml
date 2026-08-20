@@ -17,6 +17,9 @@ app:
     app-id: ${WORLD_APP_ID:app_staging_world_hero_2026}
     action: ${WORLD_ACTION:world-hero-login}
     verify-url: ${WORLD_VERIFY_URL:https://developer.worldcoin.org/api/v2/verify}
+  admin:
+    username: ${ADMIN_USERNAME:superadmin}
+    password: ${ADMIN_PASSWORD:adminpassword123}
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001}
 
