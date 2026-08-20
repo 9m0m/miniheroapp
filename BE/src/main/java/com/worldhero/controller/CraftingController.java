@@ -4,7 +4,6 @@ import com.worldhero.config.security.UserPrincipal;
 import com.worldhero.dto.BlessRequestDto;
 import com.worldhero.dto.CraftRequestDto;
 import com.worldhero.dto.ItemInstanceDto;
-import com.worldhero.dto.SocketOperationRequestDto;
 import com.worldhero.service.CraftingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,35 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/crafting")
 @RequiredArgsConstructor
-@Tag(name = "Crafting, Sockets & Alchemy", description = "Khảm ngọc, Giấy chúc phúc, Lò Giả Kim và Xưởng Thợ Rèn")
+@Tag(name = "Crafting & Blessings", description = "Blessings, Item Crafting, and Forge Workshop")
 public class CraftingController {
 
     private final CraftingService craftingService;
 
-    @PostMapping("/inlay-gem")
-    @Operation(summary = "Khảm ngọc vào ô trống trên trang bị")
-    public ResponseEntity<ItemInstanceDto> inlayGem(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody SocketOperationRequestDto request) {
-        if (principal != null && principal.getId() != null) {
-            request.setUserId(principal.getId());
-        }
-        return ResponseEntity.ok(craftingService.inlayGem(request));
-    }
-
-    @PostMapping("/remove-gem")
-    @Operation(summary = "Tháo ngọc ra khỏi trang bị")
-    public ResponseEntity<ItemInstanceDto> removeGem(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody SocketOperationRequestDto request) {
-        if (principal != null && principal.getId() != null) {
-            request.setUserId(principal.getId());
-        }
-        return ResponseEntity.ok(craftingService.removeGem(request));
-    }
-
     @PostMapping("/bless")
-    @Operation(summary = "Ép Giấy Chúc Phúc lên trang bị")
+    @Operation(summary = "Apply a Blessing Scroll to an item")
     public ResponseEntity<ItemInstanceDto> blessItem(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody BlessRequestDto request) {
@@ -59,7 +36,7 @@ public class CraftingController {
     }
 
     @PostMapping("/blacksmith")
-    @Operation(summary = "Rèn 4 món phụ kiện tại Xưởng Thợ Rèn (Nhẫn, Dây Chuyền, Bùa Chú)")
+    @Operation(summary = "Forge accessories and equipment (Rings, Talismans)")
     public ResponseEntity<ItemInstanceDto> craftAccessory(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody CraftRequestDto request) {
@@ -70,7 +47,7 @@ public class CraftingController {
     }
 
     @PostMapping("/alchemy")
-    @Operation(summary = "Nấu Giấy Chúc Phúc tại Lò Giả Kim")
+    @Operation(summary = "Brew blessings and elixirs in the Alchemy Station")
     public ResponseEntity<String> brewAlchemy(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody CraftRequestDto request) {

@@ -81,10 +81,12 @@ dump/
 # Internal Documentation & Plans
 plan.md
 GAME_DESIGN_DOCUMENT.md
-API_REFERENCE.md
 *.plan.md
 *.doc.md
 *.md
 !README.md
+!CORE_V2_API_CONTRACT.md
+!TOWER_API_DOCUMENTATION.md
+!API_REFERENCE.md
 
 

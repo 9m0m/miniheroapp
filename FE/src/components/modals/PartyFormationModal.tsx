@@ -19,38 +19,13 @@ import {
   PlusCircle,
   X,
 } from 'lucide-react';
-
-const CLASS_CONFIG: Record<HeroClass, { label: string; icon: any; color: string; image: string }> = {
-  WARRIOR: {
-    label: 'Guardian Knight',
-    icon: Shield,
-    color: 'text-amber-400',
-    image: '/characters/warrior.png',
-  },
-  RANGER: {
-    label: 'Swift Ranger',
-    icon: Crosshair,
-    color: 'text-emerald-400',
-    image: '/characters/ranger.png',
-  },
-  MAGE: {
-    label: 'Arch Mage',
-    icon: Wand2,
-    color: 'text-cyan-400',
-    image: '/characters/mage.png',
-  },
-  PRIEST: {
-    label: 'High Priest',
-    icon: HeartHandshake,
-    color: 'text-rose-400',
-    image: '/characters/priest.png',
-  },
-};
+import { getTowerSpriteConfig, ROLE_COLOR_CONFIG } from '@/engine/tower/TowerSpriteManifest';
+import { HeroRole } from '@/domain/heroes/hero.types';
 
 const SLOT_ROLES = [
-  { index: 0, label: 'Frontline / Vanguard', role: 'Vanguard', icon: Shield },
-  { index: 1, label: 'Midline / Support', role: 'Support', icon: Wand2 },
-  { index: 2, label: 'Backline / DPS', role: 'Marksman', icon: Crosshair },
+  { index: 0, label: 'Frontline', role: 'Vanguard', icon: Shield },
+  { index: 1, label: 'Midline', role: 'Tactical', icon: Wand2 },
+  { index: 2, label: 'Backline', role: 'Marksman', icon: Crosshair },
 ];
 
 export const PartyFormationModal: React.FC = () => {
@@ -89,7 +64,7 @@ export const PartyFormationModal: React.FC = () => {
 
     const best3 = sorted.slice(0, 3).map((h) => h.id);
     setCoreV2Party(best3);
-    addFloatingText?.('Auto-optimized highest ATK squad!', 180, 70, '#F59E0B', true);
+    addFloatingText?.('Auto-optimized squad formation!', 180, 70, '#F59E0B', true);
   };
 
   return (
@@ -98,7 +73,7 @@ export const PartyFormationModal: React.FC = () => {
       onClose={closeModal}
       icon={<Users size={18} className="text-cyan-400" />}
       title="Battle Squad Formation"
-      description={`Squad ATK: ${Math.round(totalSquadATK).toLocaleString()} ATK`}
+      description={`Squad Power: ${Math.round(totalSquadATK).toLocaleString()} ATK`}
     >
       <div className="space-y-3">
         {/* 1. Active Deployment 3 Slots */}
@@ -108,7 +83,7 @@ export const PartyFormationModal: React.FC = () => {
               <Swords size={13} className="text-cyan-400" aria-hidden="true" />
               <span>Active Squad ({partyIds.length}/3)</span>
             </span>
-            <span className="text-slate-400 text-xs font-normal">Tap X to bench</span>
+            <span className="text-slate-400 text-[11px] font-normal">Tap X to bench</span>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
@@ -117,14 +92,14 @@ export const PartyFormationModal: React.FC = () => {
               const SlotIcon = slot.icon;
 
               if (hero) {
-                const heroClass = (hero.heroClass || 'WARRIOR') as HeroClass;
-                const cfg = CLASS_CONFIG[heroClass] || CLASS_CONFIG.WARRIOR;
+                const sprite = getTowerSpriteConfig(hero.templateId, hero.role as HeroRole);
+                const roleConfig = hero.role && hero.role in ROLE_COLOR_CONFIG ? ROLE_COLOR_CONFIG[hero.role as HeroRole] : null;
                 const heroATK = hero.towerStats?.atk || hero.computedStats?.physAtk || 100;
 
                 return (
                   <div
                     key={hero.id}
-                    className="relative bg-slate-900 rounded-xl border border-cyan-500/40 p-2 flex flex-col items-center justify-between gap-1 shadow-sm group"
+                    className="relative bg-[#101623] rounded-lg border border-cyan-500/40 p-2 flex flex-col items-center justify-between gap-1 shadow-sm group"
                   >
                     {/* Bench button */}
                     <button
@@ -137,29 +112,30 @@ export const PartyFormationModal: React.FC = () => {
                     </button>
 
                     {/* Slot badge */}
-                    <span className="text-xs font-bold text-cyan-300 uppercase tracking-tight bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800 flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-tight bg-[#080b12] px-1.5 py-0.5 rounded border border-[#1e293b] flex items-center gap-1">
                       <SlotIcon size={10} aria-hidden="true" />
-                      <span>Slot {slot.index + 1}</span>
+                      <span>{slot.label}</span>
                     </span>
 
                     {/* Avatar */}
-                    <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center my-0.5">
-                      <img
-                        src={cfg.image}
-                        alt={hero.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
-                        }}
-                      />
+                    <div className="w-11 h-11 rounded overflow-hidden border border-[#222d3d] bg-[#080b12] flex items-center justify-center my-0.5 shadow-inner">
+                      {sprite?.imageSrc ? (
+                        <img
+                          src={sprite.imageSrc}
+                          alt={hero.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="font-bold text-amber-300">{(hero.name || 'H')[0]}</span>
+                      )}
                     </div>
 
                     {/* Info */}
                     <div className="w-full text-center truncate">
-                      <div className="text-xs font-bold text-slate-100 truncate">
-                        {hero.name || hero.templateId} <span className="text-xs text-amber-400 font-mono">Lv.{hero.level || 1}</span>
+                      <div className="text-[11px] font-bold text-slate-100 truncate">
+                        {hero.name || hero.templateId}
                       </div>
-                      <div className="text-xs text-slate-400 font-mono tabular-nums">
+                      <div className="text-[10px] text-amber-400 font-mono tabular-nums">
                         {Math.round(heroATK)} ATK
                       </div>
                     </div>
@@ -171,12 +147,12 @@ export const PartyFormationModal: React.FC = () => {
               return (
                 <div
                   key={`empty_${slot.index}`}
-                  className="rounded-xl border border-dashed border-slate-800 bg-slate-950/60 p-2.5 flex flex-col items-center justify-center gap-1.5 min-h-[110px] text-slate-500"
+                  className="rounded-lg border border-dashed border-[#1e293b] bg-[#080b12]/60 p-2.5 flex flex-col items-center justify-center gap-1.5 min-h-[110px] text-slate-500"
                 >
-                  <SlotIcon size={20} className="text-slate-600" aria-hidden="true" />
+                  <SlotIcon size={18} className="text-slate-600" aria-hidden="true" />
                   <div className="text-center">
-                    <div className="text-xs font-bold text-slate-400">Empty</div>
-                    <div className="text-xs text-slate-500">Slot {slot.index + 1}</div>
+                    <div className="text-[11px] font-bold text-slate-400">Empty</div>
+                    <div className="text-[10px] text-slate-500">{slot.label}</div>
                   </div>
                 </div>
               );
@@ -186,17 +162,17 @@ export const PartyFormationModal: React.FC = () => {
 
         {/* 2. Squad Synergy Banner */}
         <Card variant="raised" padding="sm" className="flex items-center gap-2 border-amber-500/30">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+          <div className="w-7 h-7 rounded-md bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
             <Sparkles size={14} aria-hidden="true" />
           </div>
           <div>
             <div className="text-xs font-bold text-amber-300">
-              {partyIds.length === 3 ? 'Full 3-Hero Synergy Active' : 'Deploy 3 Heroes'}
+              {partyIds.length === 3 ? 'Full 3-Hero Synergy Active (+10% Squad ATK)' : 'Deploy 3 Heroes'}
             </div>
-            <div className="text-xs text-slate-400">
+            <div className="text-[11px] text-slate-400">
               {partyIds.length === 3
-                ? '+10% Party Attack and optimized combat intervals'
-                : 'Deploy 3 heroes to activate full squad passive buffs'}
+                ? 'Passive combat bonuses and optimal turn order enabled'
+                : 'Deploy 3 heroes to activate full squad passive bonuses'}
             </div>
           </div>
         </Card>
@@ -204,14 +180,13 @@ export const PartyFormationModal: React.FC = () => {
         {/* 3. Reserve Heroes Section */}
         <div className="space-y-1.5">
           <div className="text-xs font-bold text-slate-300">
-            <span>Reserve Heroes ({reserveHeroes.length})</span>
+            <span>Reserve Champions ({reserveHeroes.length})</span>
           </div>
 
           {reserveHeroes.length > 0 ? (
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-0.5">
               {reserveHeroes.map((hero) => {
-                const heroClass = (hero.heroClass || 'WARRIOR') as HeroClass;
-                const cfg = CLASS_CONFIG[heroClass] || CLASS_CONFIG.WARRIOR;
+                const sprite = getTowerSpriteConfig(hero.templateId, hero.role);
                 const heroATK = hero.towerStats?.atk || hero.computedStats?.physAtk || 100;
 
                 return (
@@ -222,17 +197,21 @@ export const PartyFormationModal: React.FC = () => {
                     className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
-                        <img src={cfg.image} alt={hero.name} className="w-full h-full object-cover" />
+                      <div className="w-8 h-8 rounded overflow-hidden border border-[#222d3d] bg-[#080b12] shrink-0 flex items-center justify-center">
+                        {sprite?.imageSrc ? (
+                          <img src={sprite.imageSrc} alt={hero.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xs font-bold text-amber-300">{(hero.name || 'H')[0]}</span>
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-xs text-slate-100 flex items-center gap-1.5">
                           <span>{hero.name || hero.templateId}</span>
-                          <span className="text-xs text-amber-400 font-mono">
+                          <span className="text-[10px] text-amber-400 font-mono">
                             Lv.{hero.level || 1}
                           </span>
                         </div>
-                        <div className="text-xs text-slate-400 font-mono tabular-nums">
+                        <div className="text-[10px] text-slate-400 font-mono tabular-nums">
                           {hero.role || 'HERO'} • {Math.round(heroATK)} ATK
                         </div>
                       </div>
@@ -243,15 +222,15 @@ export const PartyFormationModal: React.FC = () => {
                       variant={partyIds.length < 3 ? 'accent' : 'secondary'}
                       onClick={() => addHeroToCoreParty(hero.id)}
                     >
-                      <PlusCircle size={13} className="mr-1" aria-hidden="true" /> Deploy
+                      <PlusCircle size={12} className="mr-1" aria-hidden="true" /> Deploy
                     </Button>
                   </Card>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-3 bg-slate-950 rounded-lg border border-slate-800 text-xs text-slate-500">
-              All heroes deployed to the battle squad.
+            <div className="text-center py-2.5 bg-[#080b12] rounded-md border border-[#1e293b] text-xs text-slate-500">
+              All recruited champions deployed in combat squad.
             </div>
           )}
         </div>
@@ -270,3 +249,5 @@ export const PartyFormationModal: React.FC = () => {
     </ModalShell>
   );
 };
+
+export default PartyFormationModal;

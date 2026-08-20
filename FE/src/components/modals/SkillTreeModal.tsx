@@ -55,45 +55,43 @@ export const SkillTreeModal: React.FC = () => {
       title={`${hero.name} Skill Tree`}
       description="Permanent combat passive enhancements"
     >
-      <div className="space-y-3">
+      <div className="space-y-2.5 select-none">
         {/* Skill Nodes List */}
-        <div className="space-y-2.5 max-h-[46vh] overflow-y-auto pr-0.5">
+        <div className="space-y-2 max-h-[46vh] overflow-y-auto pr-0.5">
           {skillTree.nodes.map((node) => {
             const isMax = node.currentLevel >= node.maxLevel;
             const canAfford = gold >= node.goldCostNextLevel;
 
             return (
-              <Card
+              <div
                 key={node.id}
-                variant="base"
-                padding="sm"
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-1.5 p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg shadow-sm"
               >
                 {/* Top: Icon + Name + Level */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-cyan-400 shrink-0">
-                      <Sparkles size={16} aria-hidden="true" />
+                    <div className="w-8 h-8 rounded-md bg-[#080b12] border border-[#1e293b] flex items-center justify-center text-cyan-400 shrink-0 shadow-inner">
+                      <Sparkles size={15} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs text-slate-100 truncate">{node.name}</span>
-                        <span className="text-xs font-mono text-yellow-400 font-bold">
+                        <span className="text-[10px] font-mono text-amber-400 font-black">
                           Lv.{node.currentLevel}/{node.maxLevel}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 truncate">{node.description}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{node.description}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Bonus Description */}
-                <div className="text-xs text-emerald-300 bg-emerald-950/60 px-2 py-1 rounded border border-emerald-500/20 font-medium">
+                <div className="text-[11px] text-emerald-300 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-500/20 font-medium">
                   {node.bonusDescription}
                 </div>
 
                 {/* Level Pips & Upgrade Button */}
-                <div className="flex items-center justify-between pt-1 border-t border-slate-900">
+                <div className="flex items-center justify-between pt-1 border-t border-[#1e293b]">
                   {/* Progress pips */}
                   <div className="flex items-center gap-1">
                     {Array.from({ length: node.maxLevel }).map((_, idx) => (
@@ -115,22 +113,23 @@ export const SkillTreeModal: React.FC = () => {
                       variant="accent"
                       onClick={() => handleUpgrade(node)}
                       disabled={!canAfford || isUpgrading}
+                      className="font-bold text-xs"
                     >
                       <Coins size={11} className="mr-1" aria-hidden="true" />
                       <span>{node.goldCostNextLevel.toLocaleString()} Upgrade</span>
                     </Button>
                   ) : (
-                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-xs text-emerald-400 font-black flex items-center gap-1">
                       <CheckCircle2 size={13} aria-hidden="true" /> MAX
                     </span>
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
 
-        <Button variant="secondary" fullWidth onClick={closeModal}>
+        <Button variant="secondary" fullWidth onClick={closeModal} className="min-h-[44px]">
           Close
         </Button>
       </div>
@@ -294,3 +293,5 @@ function getDefaultTreeForHero(heroId: string, heroClass: HeroClass, skills: Rec
       };
   }
 }
+
+export default SkillTreeModal;

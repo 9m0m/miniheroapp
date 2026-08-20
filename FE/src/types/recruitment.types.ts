@@ -22,6 +22,7 @@ export interface RecruitmentPullRequest {
 export interface RecruitmentPullResponse {
   heroTemplateId: string;
   heroName: string;
+  title?: string;
   role: HeroRole;
   rarity: string;
   isNew: boolean;

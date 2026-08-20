@@ -43,37 +43,35 @@ export const AwakeningPassModal: React.FC = () => {
       title="Hero Awakening Pass"
       description="7-Day streak check-in rewards"
     >
-      <div className="space-y-3">
+      <div className="space-y-3 select-none">
         {/* 7 Days List */}
-        <div className="space-y-2 max-h-[44vh] overflow-y-auto pr-0.5">
+        <div className="space-y-1.5 max-h-[44vh] overflow-y-auto pr-0.5">
           {PASS_DAYS.map((item, idx) => {
             const isToday = idx === loginDayIndex;
             const isPast = idx < loginDayIndex;
 
             return (
-              <Card
+              <div
                 key={item.day}
-                variant={isToday ? 'raised' : 'base'}
-                padding="sm"
-                className={`flex items-center justify-between gap-3 ${
+                className={`flex items-center justify-between gap-3 p-2.5 rounded-lg border bg-[#0e131d] ${
                   isToday
                     ? 'border-purple-500/60 ring-1 ring-purple-500/40'
                     : isPast
-                    ? 'opacity-60'
-                    : ''
+                    ? 'border-[#1e293b] opacity-50'
+                    : 'border-[#1e293b]'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 flex flex-col items-center justify-center font-bold text-xs shrink-0">
-                    <span className="text-xs text-slate-400">DAY</span>
-                    <span className="text-amber-400 font-mono">{item.day}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-md bg-[#080b12] border border-[#1e293b] flex flex-col items-center justify-center font-bold text-xs shrink-0 shadow-inner">
+                    <span className="text-[8px] text-slate-400">DAY</span>
+                    <span className="text-amber-400 font-mono font-black text-xs">{item.day}</span>
                   </div>
 
                   <div className="min-w-0 text-xs">
-                    <div className="text-slate-300 font-medium truncate">
+                    <div className="text-slate-300 font-medium truncate text-[11px]">
                       Free: <span className="text-slate-400">{item.free}</span>
                     </div>
-                    <div className="text-amber-300 font-semibold flex items-center gap-1 mt-0.5 truncate">
+                    <div className="text-amber-300 font-bold flex items-center gap-1 mt-0.5 truncate text-[11px]">
                       <Crown size={11} className="text-amber-400 shrink-0" aria-hidden="true" />
                       <span className="truncate">{item.golden}</span>
                     </div>
@@ -84,14 +82,14 @@ export const AwakeningPassModal: React.FC = () => {
                   {isPast ? (
                     <CheckCircle size={18} className="text-emerald-400" aria-hidden="true" />
                   ) : isToday ? (
-                    <Button size="sm" variant="accent" onClick={() => claimDailyPass(idx + 1)}>
+                    <Button size="sm" variant="accent" onClick={() => claimDailyPass(idx + 1)} className="font-black text-xs">
                       Claim
                     </Button>
                   ) : (
                     <Lock size={15} className="text-slate-600" aria-hidden="true" />
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -99,21 +97,24 @@ export const AwakeningPassModal: React.FC = () => {
         {/* Golden Track CTA */}
         {!isGoldenPassActive ? (
           <Button
-            variant="primary"
+            variant="accent"
             size="lg"
             fullWidth
             onClick={handleUnlockGolden}
+            className="font-black uppercase tracking-wider min-h-[44px]"
           >
-            <Crown size={15} className="mr-1.5 text-amber-400" aria-hidden="true" />
+            <Crown size={15} className="mr-1.5 text-slate-950" aria-hidden="true" />
             <span>Unlock Golden Track — 1.0 WLD</span>
           </Button>
         ) : (
-          <Card variant="raised" padding="sm" className="text-center text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 border-amber-500/40">
+          <div className="p-2.5 bg-amber-950/40 rounded-lg text-center text-amber-300 font-black text-xs flex items-center justify-center gap-1.5 border border-amber-500/40">
             <Crown size={14} aria-hidden="true" />
             <span>Golden Track Active (7-Day VIP Privileges)</span>
-          </Card>
+          </div>
         )}
       </div>
     </ModalShell>
   );
 };
+
+export default AwakeningPassModal;

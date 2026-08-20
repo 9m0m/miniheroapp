@@ -30,6 +30,7 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
   const [attemptResponse, setAttemptResponse] = useState<TowerAttemptResponseDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBattleStarting, setIsBattleStarting] = useState(false);
+  const [isRetreating, setIsRetreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeAttemptKey, setActiveAttemptKey] = useState<string | null>(null);
   const attemptKeyRef = React.useRef<string | null>(null);
@@ -56,19 +57,18 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
     }
   };
 
-  const fetchTowerData = async () => {
+  const fetchTowerData = async (checkRecovery = false) => {
     try {
       setIsLoading(true);
       setErrorMsg(null);
-      const [prog, floorList] = await Promise.all([
-        towerApi.getMyProgress(),
-        towerApi.getFloors(),
-      ]);
+      const prog = await towerApi.getMyProgress();
+      const seasonId = prog.seasonId || 'season-1';
+      const floorList = await towerApi.getFloors(seasonId);
       setProgress(prog);
       setFloors(floorList);
 
-      // Reload / Session recovery if user has an unacknowledged attempt
-      if (prog.unacknowledgedAttempt) {
+      // Reload / Session recovery if user has an unacknowledged attempt (only on initial load)
+      if (checkRecovery && prog.unacknowledgedAttempt) {
         const unack = prog.unacknowledgedAttempt;
         setAttemptResponse(unack);
         setBattleResult({
@@ -90,7 +90,7 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
   };
 
   useEffect(() => {
-    fetchTowerData();
+    fetchTowerData(true);
   }, []);
 
   const handleSelectFloor = (floor: TowerFloorDto) => {
@@ -120,7 +120,7 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
   };
 
   const handleStartBattle = async () => {
-    if (!selectedFloor) return;
+    if (isBattleStarting || !selectedFloor) return;
 
     let partyV2 = progress?.savedPartyV2;
     if (!partyV2?.slots || partyV2.slots.length !== 3) {
@@ -131,8 +131,8 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
       partyV2 = {
         slots: [
           { heroId: heroesList[0].id, row: 'FRONT', col: 'CENTER' },
-          { heroId: heroesList[1].id, row: 'MID', col: 'CENTER' },
-          { heroId: heroesList[2].id, row: 'BACK', col: 'CENTER' },
+          { heroId: heroesList[1].id, row: 'BACK', col: 'LEFT' },
+          { heroId: heroesList[2].id, row: 'BACK', col: 'RIGHT' },
         ],
         tactic: 'BALANCED',
         heroPolicies: {},
@@ -140,22 +140,50 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
       };
     }
 
+    // Ensure slots are mapped to unique 3x2 cells with zero collisions
+    const occupied = new Set<string>();
+    const validSlots = partyV2.slots.map((s, idx) => {
+      let row: 'FRONT' | 'BACK' = s.row === 'FRONT' ? 'FRONT' : 'BACK';
+      let col: 'LEFT' | 'CENTER' | 'RIGHT' = s.col || (row === 'FRONT' ? 'CENTER' : idx === 1 ? 'LEFT' : 'RIGHT');
+
+      let key = `${row}_${col}`;
+      if (occupied.has(key)) {
+        const fallbacks: Array<{ row: 'FRONT' | 'BACK'; col: 'LEFT' | 'CENTER' | 'RIGHT' }> = [
+          { row: 'FRONT', col: 'CENTER' },
+          { row: 'BACK', col: 'LEFT' },
+          { row: 'BACK', col: 'RIGHT' },
+          { row: 'FRONT', col: 'LEFT' },
+          { row: 'FRONT', col: 'RIGHT' },
+          { row: 'BACK', col: 'CENTER' },
+        ];
+        const nextFree = fallbacks.find((f) => !occupied.has(`${f.row}_${f.col}`));
+        if (nextFree) {
+          row = nextFree.row;
+          col = nextFree.col;
+          key = `${row}_${col}`;
+        }
+      }
+      occupied.add(key);
+
+      return {
+        heroId: s.heroId,
+        row,
+        col,
+      };
+    });
+
     const idempotencyKey = getOrCreateAttemptKey(selectedFloor.floorNumber);
 
     try {
       setIsBattleStarting(true);
       const response = await towerApi.createAttempt({
         floorNumber: selectedFloor.floorNumber,
-        slots: partyV2.slots,
+        slots: validSlots,
         tactic: partyV2.tactic,
         heroPolicies: partyV2.heroPolicies,
         energyPriority: partyV2.energyPriority,
         idempotencyKey,
       });
-
-      // Clear key only upon terminal success
-      clearAttemptKey();
-      setAttemptResponse(response);
 
       // Construct client battle result from backend replay response
       const clientBattleResult: TowerBattleResult = {
@@ -167,8 +195,10 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
         finalCombatants: response.combatants || [],
       };
 
+      setAttemptResponse(response);
       setBattleResult(clientBattleResult);
       setCurrentView('BATTLE');
+      clearAttemptKey();
     } catch (err: any) {
       console.error('Failed to start tower attempt', err);
       alert(err.response?.data?.message || 'Failed to start battle');
@@ -185,15 +215,38 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
         console.warn('Acknowledge failed non-fatally', err);
       }
     }
-    // Refresh progress in background
-    fetchTowerData();
+    // Refresh progress with backend before showing results
+    await fetchTowerData();
     setCurrentView('RESULT');
+  };
+
+  const handleSurrender = async (): Promise<boolean> => {
+    if (attemptResponse) {
+      try {
+        setIsRetreating(true);
+        await towerApi.acknowledgeAttempt(attemptResponse.attemptId);
+      } catch (err: any) {
+        console.error('Failed to acknowledge attempt on retreat', err);
+        alert(err.response?.data?.message || 'Failed to acknowledge retreat with server. Please try again.');
+        return false;
+      } finally {
+        setIsRetreating(false);
+      }
+    }
+    clearAttemptKey();
+    setAttemptResponse(null);
+    setBattleResult(null);
+    fetchTowerData();
+    setCurrentView(selectedFloor ? 'FLOOR_PREVIEW' : 'LOBBY');
+    return true;
   };
 
   const handleNextFloor = () => {
     if (!attemptResponse) return;
     const nextNum = attemptResponse.floorNumber + 1;
     const nextFloor = floors.find((f) => f.floorNumber === nextNum);
+    setBattleResult(null);
+    setAttemptResponse(null);
     if (nextFloor) {
       setSelectedFloor(nextFloor);
       getOrCreateAttemptKey(nextFloor.floorNumber);
@@ -204,6 +257,8 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
   };
 
   const handleRetryFloor = () => {
+    setBattleResult(null);
+    setAttemptResponse(null);
     if (selectedFloor) {
       getOrCreateAttemptKey(selectedFloor.floorNumber);
       setCurrentView('FLOOR_PREVIEW');
@@ -226,7 +281,7 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
       <div className="flex flex-col items-center justify-center h-full bg-slate-950 text-slate-300 p-4 select-none text-center">
         <p className="text-sm text-red-400 font-bold mb-3">{errorMsg}</p>
         <button
-          onClick={fetchTowerData}
+          onClick={() => fetchTowerData()}
           className="px-4 py-2 bg-amber-500 text-slate-950 text-xs font-bold rounded-xl"
         >
           Retry
@@ -271,7 +326,12 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
 
     case 'BATTLE':
       return battleResult ? (
-        <TowerBattleBoard battleResult={battleResult} onFinish={handleBattleFinished} />
+        <TowerBattleBoard
+          battleResult={battleResult}
+          onFinish={handleBattleFinished}
+          onSurrender={handleSurrender}
+          isRetreating={isRetreating}
+        />
       ) : null;
 
     case 'RESULT':
@@ -280,7 +340,6 @@ export const TowerManager: React.FC<TowerManagerProps> = ({ onClose }) => {
           result={attemptResponse}
           onNextFloor={handleNextFloor}
           onRetry={handleRetryFloor}
-          onWatchReplay={() => setCurrentView('BATTLE')}
           onLobby={() => setCurrentView('LOBBY')}
         />
       ) : null;

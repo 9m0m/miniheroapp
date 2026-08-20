@@ -35,76 +35,20 @@ public class CraftingServiceImpl implements CraftingService {
 
     @Override
     @Transactional
-    public ItemInstanceDto inlayGem(SocketOperationRequestDto request) {
-        UserEntity user = userService.getUserOrThrow(request.getUserId());
-
-        ItemInstanceEntity instance = itemInstanceRepository.findById(request.getItemInstanceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Trang bị không tồn tại: " + request.getItemInstanceId()));
-
-        if (!instance.getUser().getId().equals(user.getId())) {
-            throw new GameRuleViolationException("Trang bị không thuộc sở hữu của người chơi.");
-        }
-
-        int maxSockets = instance.getCurrentRarity().getMaxSockets();
-        if (maxSockets <= 0) {
-            throw new GameRuleViolationException("Trang bị phẩm cấp " + instance.getCurrentRarity() + " không hỗ trợ khảm ngọc!");
-        }
-
-        List<String> sockets = instance.getSocketsList();
-        if (sockets.size() >= maxSockets) {
-            throw new GameRuleViolationException("Trang bị đã đạt số lượng lỗ khảm tối đa (" + maxSockets + " lỗ)!");
-        }
-
-        sockets.add(request.getGemId());
-        instance.setSocketsList(sockets);
-        instance = itemInstanceRepository.save(instance);
-
-        log.info("💎 Inlay Gem SUCCESS: Inlaid {} into item {}", request.getGemId(), instance.getId());
-        return mapToEvaluatedDto(instance);
-    }
-
-    @Override
-    @Transactional
-    public ItemInstanceDto removeGem(SocketOperationRequestDto request) {
-        UserEntity user = userService.getUserOrThrow(request.getUserId());
-
-        ItemInstanceEntity instance = itemInstanceRepository.findById(request.getItemInstanceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Trang bị không tồn tại: " + request.getItemInstanceId()));
-
-        if (!instance.getUser().getId().equals(user.getId())) {
-            throw new GameRuleViolationException("Trang bị không thuộc sở hữu của người chơi.");
-        }
-
-        List<String> sockets = instance.getSocketsList();
-        if (request.getSocketIndex() >= 0 && request.getSocketIndex() < sockets.size()) {
-            sockets.remove(request.getSocketIndex());
-        } else if (request.getGemId() != null) {
-            sockets.remove(request.getGemId());
-        }
-
-        instance.setSocketsList(sockets);
-        instance = itemInstanceRepository.save(instance);
-
-        log.info("💎 Remove Gem SUCCESS: Removed gem from item {}", instance.getId());
-        return mapToEvaluatedDto(instance);
-    }
-
-    @Override
-    @Transactional
     public ItemInstanceDto blessItem(BlessRequestDto request) {
         UserEntity user = userService.getUserOrThrow(request.getUserId());
 
         ItemInstanceEntity instance = itemInstanceRepository.findById(request.getItemInstanceId())
-                .orElseThrow(() -> new ResourceNotFoundException("Trang bị không tồn tại: " + request.getItemInstanceId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Item does not exist: " + request.getItemInstanceId()));
 
         if (!instance.getUser().getId().equals(user.getId())) {
-            throw new GameRuleViolationException("Trang bị không thuộc sở hữu của người chơi.");
+            throw new GameRuleViolationException("Item is not owned by player.");
         }
 
         instance.setBlessingId(request.getBlessingId());
         instance = itemInstanceRepository.save(instance);
 
-        log.info("✨ Bless Item SUCCESS: Blessed item {} with {}", instance.getId(), request.getBlessingId());
+        log.info("Bless Item SUCCESS: Blessed item {} with {}", instance.getId(), request.getBlessingId());
         return mapToEvaluatedDto(instance);
     }
 
@@ -114,16 +58,16 @@ public class CraftingServiceImpl implements CraftingService {
         UserEntity user = userService.getUserOrThrow(request.getUserId());
 
         ItemTemplateEntity template = templateRepository.findById(request.getRecipeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Công thức phụ kiện không tồn tại: " + request.getRecipeId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Accessory blueprint does not exist: " + request.getRecipeId()));
 
         long goldCost = 1000L;
         int stonesCost = 5;
 
         if (user.getGold() < goldCost) {
-            throw new InsufficientResourceException("Không đủ Gold để rèn phụ kiện! Cần: " + goldCost + ", Hiện có: " + user.getGold());
+            throw new InsufficientResourceException("Not enough Gold to forge accessory! Required: " + goldCost + ", Current: " + user.getGold());
         }
         if (user.getEnhanceStones() < stonesCost) {
-            throw new InsufficientResourceException("Không đủ Đá Cường Hóa để rèn! Cần: " + stonesCost + ", Hiện có: " + user.getEnhanceStones());
+            throw new InsufficientResourceException("Not enough Enhance Stones to forge! Required: " + stonesCost + ", Current: " + user.getEnhanceStones());
         }
 
         user.setGold(user.getGold() - goldCost);
@@ -143,7 +87,7 @@ public class CraftingServiceImpl implements CraftingService {
                 .build();
 
         accessory = itemInstanceRepository.save(accessory);
-        log.info("⚒️ Blacksmith Craft SUCCESS: Crafted accessory {} for user {}", template.getName(), user.getId());
+        log.info("Blacksmith Craft SUCCESS: Crafted accessory {} for user {}", template.getName(), user.getId());
 
         return mapToEvaluatedDto(accessory);
     }
@@ -157,17 +101,17 @@ public class CraftingServiceImpl implements CraftingService {
         int gemsCost = 20;
 
         if (user.getGold() < goldCost) {
-            throw new InsufficientResourceException("Không đủ Gold để nấu Tiên Dược! Cần: " + goldCost + ", Hiện có: " + user.getGold());
+            throw new InsufficientResourceException("Not enough Gold to brew potion! Required: " + goldCost + ", Current: " + user.getGold());
         }
         if (user.getGems() < gemsCost) {
-            throw new InsufficientResourceException("Không đủ Gems để nấu Tiên Dược! Cần: " + gemsCost + ", Hiện có: " + user.getGems());
+            throw new InsufficientResourceException("Not enough Gems to brew potion! Required: " + gemsCost + ", Current: " + user.getGems());
         }
 
         user.setGold(user.getGold() - goldCost);
         user.setGems(user.getGems() - gemsCost);
         userRepository.save(user);
 
-        log.info("🧪 Alchemy Brew SUCCESS: Brewed {} for user {}", request.getRecipeId(), user.getId());
+        log.info("Alchemy Brew SUCCESS: Brewed {} for user {}", request.getRecipeId(), user.getId());
         return request.getRecipeId();
     }
 

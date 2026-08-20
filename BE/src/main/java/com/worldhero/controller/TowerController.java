@@ -77,7 +77,7 @@ public class TowerController {
     @PostMapping("/party/v2")
     @Operation(summary = "Lưu đội hình 3x3 Grid, Tactic, Hero Policies, và Energy Priority")
     public ResponseEntity<TowerPartyV2Dto> savePartyV2(
-            @RequestBody TowerPartyV2Dto request,
+            @jakarta.validation.Valid @RequestBody TowerPartyV2Dto request,
             @RequestParam(required = false) UUID userId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
@@ -88,7 +88,7 @@ public class TowerController {
     @PostMapping("/attempts")
     @Operation(summary = "Khởi chạy lượt đánh Tower (Backend authoritative combat resolution)")
     public ResponseEntity<TowerAttemptResponseDto> createAttempt(
-            @RequestBody TowerAttemptRequestDto request,
+            @jakarta.validation.Valid @RequestBody TowerAttemptRequestDto request,
             @RequestParam(required = false) UUID userId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {

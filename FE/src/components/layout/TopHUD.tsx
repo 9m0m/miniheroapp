@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useGameStore } from '../../store/useGameStore';
+import { useGameStore } from '@/store/useGameStore';
 import { Coins, Gem, Sparkles, Menu } from 'lucide-react';
 import { FeatureMenuSheet } from './FeatureMenuSheet';
 
@@ -17,36 +17,42 @@ export const TopHUD: React.FC = () => {
       <header
         role="banner"
         aria-label="Game status header"
-        className="w-full bg-slate-900/95 border-b border-slate-800 px-3 py-2 flex flex-col gap-2 z-30 select-none shadow-md backdrop-blur-md shrink-0"
+        className="w-full bg-gradient-to-b from-[#131926] to-[#0d121c] border-b border-[#222d3d] px-3 py-2 flex flex-col gap-1.5 z-30 select-none shadow-[0_4px_16px_rgba(0,0,0,0.6)] shrink-0"
       >
         {/* Main Currency Bar & Menu Button */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2" aria-label="Player currencies">
-            {/* Gold */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0" aria-label="Player currencies">
+            {/* Gold Capsule */}
             <div
-              className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-amber-500/30 text-amber-300 text-xs font-bold min-h-[38px]"
+              className="flex items-center gap-1.5 bg-[#080b12] px-2.5 py-1 rounded-md border border-amber-500/40 text-amber-300 text-xs font-bold min-h-[36px] shadow-inner"
               title={`Gold: ${gold.toLocaleString()}`}
             >
-              <Coins size={14} className="text-amber-400 shrink-0" aria-hidden="true" />
-              <span className="font-mono">{gold.toLocaleString()}</span>
+              <div className="w-4 h-4 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center justify-center shrink-0">
+                <Coins size={11} className="text-amber-400" aria-hidden="true" />
+              </div>
+              <span className="font-mono tabular-nums text-[11px] tracking-tight">{gold.toLocaleString()}</span>
             </div>
 
-            {/* Gems */}
+            {/* Gems Capsule */}
             <div
-              className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-cyan-500/30 text-cyan-300 text-xs font-bold min-h-[38px]"
+              className="flex items-center gap-1.5 bg-[#080b12] px-2.5 py-1 rounded-md border border-cyan-500/40 text-cyan-300 text-xs font-bold min-h-[36px] shadow-inner"
               title={`Gems: ${gems.toLocaleString()}`}
             >
-              <Gem size={14} className="text-cyan-400 shrink-0" aria-hidden="true" />
-              <span className="font-mono">{gems.toLocaleString()}</span>
+              <div className="w-4 h-4 rounded-full bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center shrink-0">
+                <Gem size={11} className="text-cyan-400" aria-hidden="true" />
+              </div>
+              <span className="font-mono tabular-nums text-[11px] tracking-tight">{gems.toLocaleString()}</span>
             </div>
 
-            {/* Enhance Stones */}
+            {/* Enhance Stones Capsule */}
             <div
-              className="flex items-center gap-1.5 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-purple-500/30 text-purple-300 text-xs font-bold min-h-[38px]"
+              className="flex items-center gap-1.5 bg-[#080b12] px-2.5 py-1 rounded-md border border-purple-500/40 text-purple-300 text-xs font-bold min-h-[36px] shadow-inner"
               title={`Enhance Stones: ${enhanceStones.toLocaleString()}`}
             >
-              <Sparkles size={14} className="text-purple-400 shrink-0" aria-hidden="true" />
-              <span className="font-mono">{enhanceStones.toLocaleString()}</span>
+              <div className="w-4 h-4 rounded-full bg-purple-500/20 border border-purple-400/50 flex items-center justify-center shrink-0">
+                <Sparkles size={11} className="text-purple-400" aria-hidden="true" />
+              </div>
+              <span className="font-mono tabular-nums text-[11px] tracking-tight">{enhanceStones.toLocaleString()}</span>
             </div>
           </div>
 
@@ -57,9 +63,9 @@ export const TopHUD: React.FC = () => {
             aria-label="Open feature menu"
             aria-haspopup="dialog"
             aria-expanded={showMenu}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition active:scale-95 flex items-center justify-center min-w-[44px] min-h-[44px] cursor-pointer"
+            className="p-2 rounded-md btn-game-dark text-slate-300 hover:text-slate-100 flex items-center justify-center min-w-[40px] min-h-[40px] cursor-pointer shrink-0 active:scale-95"
           >
-            <Menu size={18} />
+            <Menu size={17} />
           </button>
         </div>
       </header>

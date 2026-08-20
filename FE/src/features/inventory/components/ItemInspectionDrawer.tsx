@@ -46,7 +46,8 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
   const isChest = template.itemType === 'CHEST' || template.id.startsWith('chest_');
   const isKey = template.itemType === 'KEY' || template.id.startsWith('key_');
   const isEquippable = template.itemType === 'EQUIPMENT' || template.itemType === 'ACCESSORY';
-  const classMatches = !template.requiredClass || template.requiredClass === selectedHeroClass;
+  const isUniversal = template.slot === 'RING_1' || template.slot === 'TALISMAN';
+  const classMatches = isUniversal || !template.requiredClass || template.requiredClass === selectedHeroClass;
   const hasStats = Object.values(computedStats).some((val) => typeof val === 'number' && val > 0);
 
   return (
@@ -58,15 +59,15 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
         <div className="flex items-center gap-1.5">
           <span style={{ color }}>{template.name}</span>
           {item.enhanceLevel > 0 && (
-            <Badge variant="accent" size="sm">
+            <Badge variant="accent" size="xs">
               +{item.enhanceLevel}
             </Badge>
           )}
         </div>
       }
       description={
-        <span className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase" style={{ color }}>
+        <span className="flex items-center gap-1.5 text-[10px] font-mono">
+          <span className="font-bold uppercase" style={{ color }}>
             {item.rarity}
           </span>
           <span>•</span>
@@ -84,104 +85,62 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
     >
       <div className="space-y-3">
         {/* Description */}
-        <p className="text-xs text-slate-300 italic bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+        <p className="text-[11px] text-slate-300 italic bg-[#080b12] p-2.5 rounded-md border border-[#1e293b]">
           &ldquo;{template.description}&rdquo;
         </p>
 
         {/* Stats Grid */}
         {hasStats && isEquippable && (
-          <Card variant="base" padding="sm" className="grid grid-cols-2 gap-1.5 text-xs font-mono">
+          <div className="grid grid-cols-2 gap-1.5 text-xs font-mono bg-[#080b12] p-2 rounded-md border border-[#1e293b]">
             {computedStats.physAtk > 0 && (
-              <div className="flex justify-between text-rose-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-rose-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Phys ATK:</span>
                 <span className="tabular-nums">+{computedStats.physAtk}</span>
               </div>
             )}
             {computedStats.magicAtk > 0 && (
-              <div className="flex justify-between text-purple-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-purple-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Magic ATK:</span>
                 <span className="tabular-nums">+{computedStats.magicAtk}</span>
               </div>
             )}
             {computedStats.armor > 0 && (
-              <div className="flex justify-between text-blue-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-blue-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Armor:</span>
                 <span className="tabular-nums">+{computedStats.armor}</span>
               </div>
             )}
             {computedStats.maxHp > 0 && (
-              <div className="flex justify-between text-emerald-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-emerald-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Max HP:</span>
                 <span className="tabular-nums">+{computedStats.maxHp}</span>
               </div>
             )}
             {computedStats.critRate > 0 && (
-              <div className="flex justify-between text-yellow-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-yellow-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Crit Rate:</span>
                 <span className="tabular-nums">+{computedStats.critRate.toFixed(1)}%</span>
               </div>
             )}
             {computedStats.critDmg > 0 && (
-              <div className="flex justify-between text-amber-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-amber-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Crit DMG:</span>
                 <span className="tabular-nums">+{computedStats.critDmg.toFixed(0)}%</span>
               </div>
             )}
             {computedStats.atkSpeed > 0 && (
-              <div className="flex justify-between text-teal-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-teal-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Atk Speed:</span>
                 <span className="tabular-nums">+{computedStats.atkSpeed.toFixed(2)}</span>
               </div>
             )}
             {computedStats.dmgReduction > 0 && (
-              <div className="flex justify-between text-indigo-400 font-semibold bg-slate-900/60 p-1.5 rounded">
+              <div className="flex justify-between text-indigo-400 font-bold bg-[#101623] p-1.5 rounded">
                 <span>Dmg Reduct:</span>
                 <span className="tabular-nums">+{computedStats.dmgReduction.toFixed(1)}%</span>
               </div>
             )}
-            {computedStats.hpRegen > 0 && (
-              <div className="flex justify-between text-emerald-400 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>HP Regen:</span>
-                <span className="tabular-nums">+{computedStats.hpRegen}/s</span>
-              </div>
-            )}
-            {computedStats.lifeSteal > 0 && (
-              <div className="flex justify-between text-rose-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>Life Steal:</span>
-                <span className="tabular-nums">+{computedStats.lifeSteal.toFixed(1)}%</span>
-              </div>
-            )}
-            {computedStats.physDodge > 0 && (
-              <div className="flex justify-between text-cyan-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>Phys Dodge:</span>
-                <span className="tabular-nums">+{computedStats.physDodge.toFixed(1)}%</span>
-              </div>
-            )}
-            {computedStats.spellEvasion > 0 && (
-              <div className="flex justify-between text-purple-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>Spell Evasion:</span>
-                <span className="tabular-nums">+{computedStats.spellEvasion.toFixed(1)}%</span>
-              </div>
-            )}
-            {computedStats.cdr > 0 && (
-              <div className="flex justify-between text-yellow-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>Cooldown Red:</span>
-                <span className="tabular-nums">+{computedStats.cdr.toFixed(1)}%</span>
-              </div>
-            )}
-            {computedStats.atkPercent > 0 && (
-              <div className="flex justify-between text-orange-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>ATK Bonus:</span>
-                <span className="tabular-nums">+{computedStats.atkPercent.toFixed(1)}%</span>
-              </div>
-            )}
-            {computedStats.elemDmgBonus > 0 && (
-              <div className="flex justify-between text-amber-300 font-semibold bg-slate-900/60 p-1.5 rounded">
-                <span>Elem DMG:</span>
-                <span className="tabular-nums">+{computedStats.elemDmgBonus.toFixed(1)}%</span>
-              </div>
-            )}
-          </Card>
+          </div>
         )}
 
         {/* Action Buttons */}
@@ -197,7 +156,7 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
               }}
             >
               <Box size={14} className="mr-1.5" />
-              Open Chest Loot
+              <span>Open Chest Loot</span>
             </Button>
           ) : isEquippedOnHero ? (
             <Button
@@ -238,7 +197,7 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
                         }}
                       >
                         <ArrowUpCircle size={14} className="mr-1" />
-                        Equip ({selectedHeroClass})
+                        <span>Equip ({selectedHeroClass})</span>
                       </Button>
                     ) : (
                       <Button
@@ -251,7 +210,7 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
                           }
                         }}
                       >
-                        Equip ({template.requiredClass})
+                        <span>Equip ({template.requiredClass})</span>
                       </Button>
                     )}
                   </>
@@ -282,7 +241,7 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
                   }}
                 >
                   <Trash2 size={13} className="mr-1" />
-                  Salvage for Gold & Stones
+                  <span>Salvage for Gold & Stones</span>
                 </Button>
               )}
             </div>
@@ -292,3 +251,5 @@ export const ItemInspectionDrawer: React.FC<ItemInspectionDrawerProps> = ({
     </BottomSheet>
   );
 };
+
+export default ItemInspectionDrawer;

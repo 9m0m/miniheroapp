@@ -1,55 +1,43 @@
 import { apiClient } from './client';
 import { TowerFloorDto, TowerAttemptRequestDto, TowerAttemptResponseDto, TowerProgressDto, TowerPartyV2Dto } from '@/types/tower.types';
-import { TowerReplayEvent } from '@/domain/combat/combat.types';
 
 export const towerApi = {
-  async getCurrentSeason(): Promise<{ seasonId: string; mode: string; name: string; totalFloors: number }> {
-    const res = await apiClient.get<{ seasonId: string; mode: string; name: string; totalFloors: number }>(
-      '/tower/seasons/current?mode=PROGRESS'
-    );
+  /**
+   * Lấy danh sách 30 tầng của mùa giải hiện tại
+   */
+  async getFloors(seasonId?: string): Promise<TowerFloorDto[]> {
+    const sId = seasonId || 'season-1';
+    const res = await apiClient.get<TowerFloorDto[]>(`/tower/seasons/${sId}/floors`);
     return res.data;
   },
 
-  async getFloors(seasonId = 'season-1'): Promise<TowerFloorDto[]> {
-    const res = await apiClient.get<TowerFloorDto[]>(`/tower/seasons/${seasonId}/floors`);
-    return res.data;
-  },
-
-  async getFloorByNumber(floorNumber: number): Promise<TowerFloorDto> {
-    const res = await apiClient.get<TowerFloorDto>(`/tower/floors/${floorNumber}`);
-    return res.data;
-  },
-
+  /**
+   * Lấy tiến độ Tower và đội hình đã lưu của user
+   */
   async getMyProgress(): Promise<TowerProgressDto> {
     const res = await apiClient.get<TowerProgressDto>('/tower/progress/me');
     return res.data;
   },
 
-  async getPartyV2(): Promise<TowerPartyV2Dto> {
-    const res = await apiClient.get<TowerPartyV2Dto>('/tower/party/v2');
-    return res.data;
-  },
-
+  /**
+   * Lưu đội hình 3x2 Grid, chiến thuật, hero policies và energy priority
+   */
   async savePartyV2(party: TowerPartyV2Dto): Promise<TowerPartyV2Dto> {
     const res = await apiClient.post<TowerPartyV2Dto>('/tower/party/v2', party);
     return res.data;
   },
 
+  /**
+   * Khởi chạy lượt đánh Tower (Backend authoritative combat resolution)
+   */
   async createAttempt(request: TowerAttemptRequestDto): Promise<TowerAttemptResponseDto> {
     const res = await apiClient.post<TowerAttemptResponseDto>('/tower/attempts', request);
     return res.data;
   },
 
-  async getAttempt(attemptId: string): Promise<TowerAttemptResponseDto> {
-    const res = await apiClient.get<TowerAttemptResponseDto>(`/tower/attempts/${attemptId}`);
-    return res.data;
-  },
-
-  async getAttemptReplay(attemptId: string): Promise<TowerReplayEvent[]> {
-    const res = await apiClient.get<TowerReplayEvent[]>(`/tower/attempts/${attemptId}/replay`);
-    return res.data;
-  },
-
+  /**
+   * Xác nhận hoàn tất lượt đánh hoặc đầu hàng để giải phóng attempt
+   */
   async acknowledgeAttempt(attemptId: string): Promise<TowerAttemptResponseDto> {
     const res = await apiClient.post<TowerAttemptResponseDto>(`/tower/attempts/${attemptId}/acknowledge`, {});
     return res.data;

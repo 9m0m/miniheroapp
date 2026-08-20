@@ -36,6 +36,8 @@ public class ExpeditionServiceImpl implements ExpeditionService {
     private final UserRepository userRepository;
     private final HeroRepository heroRepository;
     private final OnboardingStateRepository onboardingRepository;
+    private final com.worldhero.repository.ItemTemplateRepository itemTemplateRepository;
+    private final com.worldhero.repository.ItemInstanceRepository itemInstanceRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${expedition.paid-slots.enabled:false}")
@@ -237,8 +239,9 @@ public class ExpeditionServiceImpl implements ExpeditionService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(run.getCompletesAt())) {
-            long remaining = Duration.between(now, run.getCompletesAt()).getSeconds();
+        // Allow a 1.5-second clock skew / sub-second network latency grace period
+        if (now.plusNanos(1_500_000_000L).isBefore(run.getCompletesAt())) {
+            long remaining = Math.max(1, Duration.between(now, run.getCompletesAt()).getSeconds());
             throw new GameRuleViolationException("Expedition is still in progress. " + remaining + " seconds remaining.");
         }
 
@@ -273,6 +276,21 @@ public class ExpeditionServiceImpl implements ExpeditionService {
                 onboarding.setFirstExpeditionClaimed(true);
                 onboarding.setStep(OnboardingStep.THIRD_SUMMON_REQUIRED);
                 onboardingRepository.save(onboarding);
+            }
+
+            // Deterministic starter crafting material drop (1 Ring Frame)
+            var ringFrameTemplateOpt = itemTemplateRepository.findById("mat_ring_frame");
+            if (ringFrameTemplateOpt.isPresent()) {
+                var ringFrame = com.worldhero.model.entity.ItemInstanceEntity.builder()
+                        .user(user)
+                        .template(ringFrameTemplateOpt.get())
+                        .itemLevel(1)
+                        .currentRarity(com.worldhero.model.enums.ItemRarity.UNCOMMON)
+                        .enhanceLevel(0)
+                        .hero(null)
+                        .equippedSlot(null)
+                        .build();
+                itemInstanceRepository.save(ringFrame);
             }
         }
 
@@ -334,7 +352,9 @@ public class ExpeditionServiceImpl implements ExpeditionService {
 
     private ExpeditionRunDto mapToDto(ExpeditionRunEntity entity) {
         LocalDateTime now = LocalDateTime.now();
-        long remaining = Math.max(0, Duration.between(now, entity.getCompletesAt()).getSeconds());
+        long remaining = now.plusNanos(1_500_000_000L).isBefore(entity.getCompletesAt())
+                ? Math.max(1, Duration.between(now, entity.getCompletesAt()).getSeconds())
+                : 0;
         boolean isClaimable = entity.getStatus() == ExpeditionRunStatus.RUNNING && remaining == 0;
 
         List<UUID> heroIds = parseHeroIds(entity.getHeroIdsJson());

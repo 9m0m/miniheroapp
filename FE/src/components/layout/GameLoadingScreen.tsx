@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Swords } from 'lucide-react';
 
 interface GameLoadingScreenProps {
   message?: string;
@@ -20,17 +19,19 @@ export const GameLoadingScreen: React.FC<GameLoadingScreenProps> = ({
       {/* Background Ambient Glow */}
       <div
         aria-hidden="true"
-        className="absolute w-72 h-72 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none animate-pulse"
+        className="absolute w-72 h-72 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none animate-pulse"
       />
 
       <div className="relative flex flex-col items-center text-center max-w-xs w-full z-10">
-        {/* Animated Brand Emblem */}
-        <div className="relative mb-5">
-          <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-indigo-900/60 via-slate-900 to-amber-950/40 border border-amber-500/40 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.25)]">
-            <Sparkles className="w-9 h-9 text-amber-400" aria-hidden="true" />
-          </div>
-          <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg bg-slate-900 border border-indigo-500/50 flex items-center justify-center text-indigo-300 shadow">
-            <Swords className="w-3.5 h-3.5" aria-hidden="true" />
+        {/* Sleek Minimalist Ring Loader */}
+        <div className="relative w-16 h-16 mb-5 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full border-2 border-slate-800" />
+          <div
+            className="absolute inset-0 rounded-full border-2 border-transparent border-t-amber-400 border-r-indigo-500 animate-spin"
+            style={{ animationDuration: '1s' }}
+          />
+          <div className="w-8 h-8 rounded-full bg-slate-900/80 border border-slate-700/60 flex items-center justify-center shadow-inner">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
           </div>
         </div>
 

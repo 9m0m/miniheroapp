@@ -94,9 +94,11 @@ public class HeroServiceImpl implements HeroService {
         com.worldhero.model.enums.HeroRole role = null;
         CombatStatsDto towerStats = null;
 
+        String heroName = null;
         if (templateId != null) {
             var templateOpt = heroCatalogService.getTemplateById(templateId);
             if (templateOpt.isPresent()) {
+                heroName = templateOpt.get().getName();
                 role = templateOpt.get().getRole();
                 CombatStatsDto baseTower = templateOpt.get().getBaseStats();
                 if (baseTower != null) {
@@ -121,6 +123,7 @@ public class HeroServiceImpl implements HeroService {
         return HeroDetailDto.builder()
                 .id(hero.getId())
                 .templateId(templateId)
+                .name(heroName != null ? heroName : (hero.getHeroClass() != null ? hero.getHeroClass().name() : "Hero"))
                 .heroClass(hero.getHeroClass())
                 .role(role)
                 .level(hero.getLevel())

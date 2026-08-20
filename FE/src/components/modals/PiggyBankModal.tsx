@@ -34,10 +34,10 @@ export const PiggyBankModal: React.FC = () => {
       title="Gem Piggy Bank"
       description="Battle accumulator vault"
     >
-      <div className="space-y-3">
+      <div className="space-y-3 select-none">
         {/* Gem Accumulator Vault Display */}
-        <Card variant="base" padding="md" className="text-center space-y-2">
-          <div className="text-2xl font-bold text-amber-400 flex items-center justify-center gap-1.5 font-mono tabular-nums">
+        <div className="p-3.5 bg-[#0e131d] border border-[#1e293b] rounded-lg text-center space-y-2 shadow-sm">
+          <div className="text-2xl font-black text-amber-400 flex items-center justify-center gap-1.5 font-mono tabular-nums">
             <Gem size={20} className="text-cyan-400" aria-hidden="true" />
             <span>{piggyBankGems.toLocaleString()}</span>
             <span className="text-xs text-slate-400 font-sans font-normal self-end mb-0.5">/ 1,000 Gems</span>
@@ -50,25 +50,25 @@ export const PiggyBankModal: React.FC = () => {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Piggy bank capacity"
-            className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800"
+            className="w-full bg-[#080b12] rounded-full h-2 overflow-hidden border border-[#1e293b]"
           >
             <div
-              className="bg-amber-500 h-full rounded-full transition-all duration-300"
+              className="bg-amber-500 h-full rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
-          <div className="flex justify-between text-xs text-slate-400 font-medium">
+          <div className="flex justify-between text-[11px] text-slate-400 font-medium">
             <span>Capacity: {progressPercent}%</span>
-            <span>{isFull ? 'Vault Full' : 'Accumulating from battles'}</span>
+            <span className="text-amber-400 font-bold">{isFull ? 'Vault Full' : 'Accumulating from battles'}</span>
           </div>
-        </Card>
+        </div>
 
         {/* Benefits Card */}
-        <Card variant="raised" padding="md" className="space-y-2 text-xs text-slate-300">
+        <div className="space-y-1.5 p-3 bg-[#080b12] border border-[#1e293b] rounded-lg text-xs text-slate-300">
           <div className="flex items-center gap-2">
             <Sparkles size={14} className="text-amber-400 shrink-0" aria-hidden="true" />
-            <span>Estimated In-Game Value: <strong>~$10.00 USD</strong></span>
+            <span>Estimated In-Game Value: <strong className="text-slate-100">~$10.00 USD</strong></span>
           </div>
           <div className="flex items-center gap-2">
             <Zap size={14} className="text-yellow-400 shrink-0" aria-hidden="true" />
@@ -76,9 +76,9 @@ export const PiggyBankModal: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <ShieldCheck size={14} className="text-emerald-400 shrink-0" aria-hidden="true" />
-            <span>Instant Gem credit to your account</span>
+            <span>Instant Gem credit directly into your balance</span>
           </div>
-        </Card>
+        </div>
 
         {/* Action Button */}
         <Button
@@ -86,14 +86,17 @@ export const PiggyBankModal: React.FC = () => {
           size="lg"
           fullWidth
           onClick={handleOpenPiggy}
+          className="font-black uppercase tracking-wider min-h-[44px]"
         >
           <span>Claim Vault — 0.5 WLD</span>
         </Button>
 
-        <p className="text-xs text-center text-slate-500">
+        <p className="text-[10px] text-center text-slate-500 font-mono">
           Instant checkout via MiniKit Pay on World App
         </p>
       </div>
     </ModalShell>
   );
 };
+
+export default PiggyBankModal;

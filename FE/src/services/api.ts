@@ -39,9 +39,7 @@ export const gameApi = {
   smartFusion: cubeApi.smartFusion,
   gemFusion: cubeApi.gemFusion,
 
-  // Sockets, Blessings & Crafting
-  inlayGem: craftingApi.inlayGem,
-  removeGem: craftingApi.removeGem,
+  // Blessings & Crafting
   blessItem: craftingApi.blessItem,
   craftAccessory: craftingApi.craftAccessory,
   brewAlchemy: craftingApi.brewAlchemy,

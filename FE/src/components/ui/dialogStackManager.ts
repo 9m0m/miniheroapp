@@ -65,13 +65,7 @@ class DialogStackManager {
     if (typeof document === 'undefined') return;
     const appRoot = document.getElementById('app-root');
     if (appRoot) {
-      if (isInert) {
-        appRoot.setAttribute('aria-hidden', 'true');
-        appRoot.inert = true;
-      } else {
-        appRoot.removeAttribute('aria-hidden');
-        appRoot.inert = false;
-      }
+      appRoot.inert = isInert;
     }
   }
 
@@ -83,11 +77,8 @@ class DialogStackManager {
       if (!entry.element) return;
       const isTop = idx === topIndex;
       if (isTop) {
-        entry.element.removeAttribute('aria-hidden');
         entry.element.inert = false;
       } else {
-        // Parent dialog in stack is inert and hidden from AT while child modal is open
-        entry.element.setAttribute('aria-hidden', 'true');
         entry.element.inert = true;
       }
     });

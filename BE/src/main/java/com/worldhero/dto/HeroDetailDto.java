@@ -18,6 +18,7 @@ import java.util.UUID;
 public class HeroDetailDto {
     private UUID id;
     private String templateId;
+    private String name;
     private HeroClass heroClass;
     private HeroRole role;
 

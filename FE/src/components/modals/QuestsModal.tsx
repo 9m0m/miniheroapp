@@ -100,7 +100,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
       onClose={onClose}
       icon={<Award size={18} className="text-amber-400" />}
       title="Quest Chronicles"
-      description="Complete bounties and claim milestone rewards"
+      description="Complete tactical bounties and claim milestone chests"
     >
       <div className="space-y-3">
         {/* Tab Navigation */}
@@ -110,10 +110,10 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
             role="tab"
             aria-selected={activeTab === 'DAILY'}
             onClick={() => setActiveTab('DAILY')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border min-h-[44px] ${
+            className={`flex-1 py-2 rounded-md text-xs font-black transition flex items-center justify-center gap-1.5 border min-h-[40px] cursor-pointer ${
               activeTab === 'DAILY'
-                ? 'bg-cyan-600 text-white border-cyan-400 shadow-sm'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                ? 'btn-game-cyan shadow-sm'
+                : 'bg-[#080b12] text-slate-400 border-[#1e293b] hover:text-slate-200'
             }`}
           >
             <Calendar size={14} aria-hidden="true" />
@@ -125,10 +125,10 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
             role="tab"
             aria-selected={activeTab === 'WEEKLY'}
             onClick={() => setActiveTab('WEEKLY')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 border min-h-[44px] ${
+            className={`flex-1 py-2 rounded-md text-xs font-black transition flex items-center justify-center gap-1.5 border min-h-[40px] cursor-pointer ${
               activeTab === 'WEEKLY'
-                ? 'bg-purple-600 text-white border-purple-400 shadow-sm'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                ? 'btn-game-amber shadow-sm'
+                : 'bg-[#080b12] text-slate-400 border-[#1e293b] hover:text-slate-200'
             }`}
           >
             <Flame size={14} aria-hidden="true" />
@@ -137,13 +137,13 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         {/* Milestone Track Card */}
-        <Card variant="base" padding="md" className="space-y-2.5">
+        <div className="space-y-2 p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg shadow-sm">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-slate-200 flex items-center gap-1.5">
               <Gift size={14} className="text-amber-400" aria-hidden="true" />
-              <span>{activeTab === 'DAILY' ? 'Daily Progress' : 'Weekly Season Progress'}</span>
+              <span>{activeTab === 'DAILY' ? 'Daily Milestone Track' : 'Weekly Season Track'}</span>
             </span>
-            <span className="font-mono font-bold text-amber-300 text-xs tabular-nums">
+            <span className="font-mono font-black text-amber-300 text-xs tabular-nums">
               {currentPoints} / {maxPoints} Pts ({progressPercent}%)
             </span>
           </div>
@@ -155,16 +155,16 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Milestone progression"
-            className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800"
+            className="w-full bg-[#080b12] h-2 rounded-full overflow-hidden border border-[#1e293b]"
           >
             <div
-              className="bg-cyan-500 h-full rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-cyan-500 to-amber-400 h-full rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
           {/* Milestone Chest Buttons */}
-          <div className="grid grid-cols-6 gap-1 pt-1">
+          <div className="grid grid-cols-6 gap-1 pt-0.5">
             {currentMilestones.map((m) => {
               const isReady = m.canClaim;
               const isClaimed = m.isClaimed;
@@ -175,33 +175,33 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
                   key={m.milestoneIndex}
                   onClick={() => handleClaimMilestone(m)}
                   disabled={!isReady || isClaimed}
-                  className={`py-1.5 px-1 rounded-lg border flex flex-col items-center justify-center transition min-h-[44px] ${
+                  className={`py-1.5 px-1 rounded-md border flex flex-col items-center justify-center transition min-h-[44px] cursor-pointer ${
                     isClaimed
-                      ? 'bg-slate-900 border-emerald-500/40 text-emerald-400 opacity-70'
+                      ? 'bg-[#080b12] border-emerald-500/40 text-emerald-400 opacity-60'
                       : isReady
-                      ? 'bg-amber-500 text-black font-bold border-amber-400 shadow-sm'
-                      : 'bg-slate-950 border-slate-800 text-slate-500'
+                      ? 'btn-game-amber shadow-sm font-black'
+                      : 'bg-[#080b12] border-[#1e293b] text-slate-600'
                   }`}
                   title={`${m.pointsRequired} Pts: +${m.goldReward} Gold, +${m.gemsReward} Gems`}
                 >
-                  <Gift size={14} aria-hidden="true" />
-                  <span className="text-xs font-mono font-bold tabular-nums mt-0.5">{m.pointsRequired}p</span>
+                  <Gift size={13} aria-hidden="true" />
+                  <span className="text-[10px] font-mono font-bold tabular-nums mt-0.5">{m.pointsRequired}p</span>
                 </button>
               );
             })}
           </div>
-        </Card>
+        </div>
 
         {/* Quests List */}
-        <div className="space-y-2 max-h-[38vh] overflow-y-auto pr-0.5">
+        <div className="space-y-1.5 max-h-[38vh] overflow-y-auto pr-0.5">
           {loading ? (
             <div className="py-8 flex flex-col items-center justify-center text-slate-400 text-xs gap-2">
               <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-              <span>Loading quests...</span>
+              <span>Loading bounties...</span>
             </div>
           ) : currentQuests.length === 0 ? (
-            <div className="py-8 text-center text-slate-500 text-xs">
-              No quests active. Check back tomorrow!
+            <div className="py-8 text-center text-slate-500 text-xs bg-[#0e131d] rounded-lg border border-[#1e293b]">
+              No active bounties. Check back at daily reset!
             </div>
           ) : (
             currentQuests.map((quest) => {
@@ -209,25 +209,23 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
               const isReady = quest.isCompleted && !quest.isClaimed;
 
               return (
-                <Card
+                <div
                   key={quest.id}
-                  variant="raised"
-                  padding="sm"
-                  className={`flex flex-col gap-2 ${quest.isClaimed ? 'opacity-60' : ''}`}
+                  className={`flex flex-col gap-1.5 p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg shadow-sm ${quest.isClaimed ? 'opacity-50' : ''}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Swords size={15} className="text-cyan-400 shrink-0" aria-hidden="true" />
+                      <Swords size={14} className="text-cyan-400 shrink-0" aria-hidden="true" />
                       <div className="min-w-0">
                         <h4 className="text-xs font-bold text-slate-100 truncate">{quest.title}</h4>
-                        <p className="text-xs text-slate-400 truncate">{quest.description}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{quest.description}</p>
                       </div>
                     </div>
 
                     {/* Claim Button / Status Badge */}
                     {quest.isClaimed ? (
-                      <Badge variant="success" size="sm">
-                        <CheckCircle2 size={11} aria-hidden="true" />
+                      <Badge variant="success" size="xs">
+                        <CheckCircle2 size={10} aria-hidden="true" />
                         <span>Claimed</span>
                       </Badge>
                     ) : isReady ? (
@@ -236,34 +234,35 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
                         variant="accent"
                         onClick={() => handleClaimQuest(quest)}
                         isLoading={claimingId === quest.id}
+                        className="text-xs font-black uppercase tracking-wider"
                       >
                         Claim +{quest.activityPoints}p
                       </Button>
                     ) : (
-                      <span className="text-xs text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800 font-mono tabular-nums shrink-0">
+                      <span className="text-[10px] text-slate-400 bg-[#080b12] px-2 py-0.5 rounded border border-[#1e293b] font-mono tabular-nums shrink-0">
                         {quest.currentCount}/{quest.targetCount}
                       </span>
                     )}
                   </div>
 
                   {/* Rewards Row */}
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-1.5 border-t border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <span className="text-amber-300 font-bold tabular-nums">+{quest.activityPoints} Pts</span>
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-[#1e293b]">
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="text-amber-300 font-bold tabular-nums font-sans">+{quest.activityPoints} Pts</span>
                       {quest.goldReward > 0 && (
-                        <span className="flex items-center gap-1 text-yellow-400 font-mono tabular-nums">
+                        <span className="flex items-center gap-0.5 text-amber-400 font-bold tabular-nums">
                           <Coins size={11} aria-hidden="true" />
                           <span>+{quest.goldReward.toLocaleString()}</span>
                         </span>
                       )}
                       {quest.gemsReward > 0 && (
-                        <span className="flex items-center gap-1 text-cyan-400 font-mono tabular-nums">
+                        <span className="flex items-center gap-0.5 text-cyan-400 font-bold tabular-nums">
                           <Gem size={11} aria-hidden="true" />
                           <span>+{quest.gemsReward}</span>
                         </span>
                       )}
                       {quest.stonesReward > 0 && (
-                        <span className="flex items-center gap-1 text-purple-400 font-mono tabular-nums">
+                        <span className="flex items-center gap-0.5 text-purple-400 font-bold tabular-nums">
                           <Hammer size={11} aria-hidden="true" />
                           <span>+{quest.stonesReward}</span>
                         </span>
@@ -271,7 +270,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
                     </div>
 
                     {!quest.isClaimed && (
-                      <div className="w-16 bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                      <div className="w-16 bg-[#080b12] h-1.5 rounded-full overflow-hidden border border-[#1e293b]">
                         <div
                           className="bg-cyan-500 h-full rounded-full transition-all duration-200"
                           style={{ width: `${Math.round(progressRatio * 100)}%` }}
@@ -279,7 +278,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
                       </div>
                     )}
                   </div>
-                </Card>
+                </div>
               );
             })
           )}
@@ -288,3 +287,5 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
     </ModalShell>
   );
 };
+
+export default QuestsModal;

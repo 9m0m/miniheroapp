@@ -32,8 +32,8 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
             label: 'Altar of Heroes',
             subtext: 'Summon & Recruits',
             icon: Sparkles,
-            color: 'text-amber-300',
-            bg: 'bg-amber-950/60 border-amber-500/50 ring-1 ring-amber-500/30',
+            color: 'text-amber-400',
+            bg: 'bg-gradient-to-r from-amber-950/40 to-slate-900 border-amber-500/40',
             action: () => handleOpenFeature('RECRUITMENT'),
           },
           {
@@ -42,7 +42,7 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
             subtext: 'Patrol & Materials',
             icon: Compass,
             color: 'text-cyan-400',
-            bg: 'bg-cyan-950/50 border-cyan-500/40 ring-1 ring-cyan-500/20',
+            bg: 'bg-gradient-to-r from-cyan-950/40 to-slate-900 border-cyan-500/40',
             action: () => handleOpenFeature('EXPEDITION'),
           },
         ]
@@ -51,11 +51,11 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
       ? [
           {
             id: 'TOWER',
-            label: 'Progress Tower',
-            subtext: '3v3 Auto-Turn Battle',
+            label: 'The Infinite Tower',
+            subtext: '3v3 Turn Strategy',
             icon: Castle,
             color: 'text-amber-400',
-            bg: 'bg-amber-950/50 border-amber-500/40 ring-1 ring-amber-500/20',
+            bg: 'bg-gradient-to-r from-amber-950/50 to-slate-900 border-amber-500/50',
             action: () => handleOpenFeature('TOWER'),
           },
         ]
@@ -65,8 +65,8 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
       label: 'Chest Vault',
       subtext: totalChests > 0 ? `${totalChests} chests ready` : '0 chests',
       icon: Package,
-      color: 'text-amber-400',
-      bg: 'bg-amber-950/40 border-amber-900/50',
+      color: 'text-amber-300',
+      bg: 'bg-slate-900/90 border-[#222d3d]',
       action: () => handleOpenFeature('CHEST_VAULT'),
     },
     {
@@ -75,25 +75,25 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
       subtext: 'Daily & Milestones',
       icon: Swords,
       color: 'text-emerald-400',
-      bg: 'bg-emerald-950/40 border-emerald-900/50',
+      bg: 'bg-slate-900/90 border-[#222d3d]',
       action: () => handleOpenFeature('QUESTS'),
     },
     {
       id: 'TRIAL_ARENA',
       label: 'Trial Arena',
-      subtext: 'Ranked Boss Rush',
+      subtext: 'DPS & Boss Rush',
       icon: Trophy,
       color: 'text-purple-400',
-      bg: 'bg-purple-950/40 border-purple-900/50',
+      bg: 'bg-slate-900/90 border-[#222d3d]',
       action: () => handleOpenFeature('TRIAL_ARENA'),
     },
     {
       id: 'AWAKENING_PASS',
       label: 'Awakening Pass',
-      subtext: '7-Day Rewards',
+      subtext: '7-Day Check-in',
       icon: CalendarCheck,
       color: 'text-sky-400',
-      bg: 'bg-sky-950/40 border-sky-900/50',
+      bg: 'bg-slate-900/90 border-[#222d3d]',
       action: () => handleOpenFeature('AWAKENING_PASS'),
     },
     {
@@ -102,14 +102,14 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
       subtext: 'Gem Vault',
       icon: PiggyBank,
       color: 'text-pink-400',
-      bg: 'bg-pink-950/40 border-pink-900/50',
+      bg: 'bg-slate-900/90 border-[#222d3d]',
       action: () => handleOpenFeature('PIGGY_BANK'),
     },
   ];
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} title="Features & Events">
-      <div className="grid grid-cols-2 gap-2.5 py-1">
+    <BottomSheet isOpen={isOpen} onClose={onClose} title="Celestial Operations">
+      <div className="grid grid-cols-2 gap-2 py-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -117,14 +117,14 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
               key={item.id}
               type="button"
               onClick={item.action}
-              className={`flex items-center gap-2.5 p-3 rounded-lg border text-left transition-[background-color,filter,transform] active:scale-[0.98] ${item.bg} hover:brightness-110 min-h-[56px] cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400`}
+              className={`flex items-center gap-2.5 p-2.5 rounded-md border text-left transition-[background-color,filter,transform] duration-150 active:scale-[0.98] ${item.bg} hover:brightness-110 min-h-[54px] cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400`}
             >
-              <div className={`p-2 rounded-md bg-slate-900/80 border border-slate-800 ${item.color} shrink-0`}>
-                <Icon className="w-5 h-5" />
+              <div className={`p-2 rounded-md bg-[#080b12] border border-[#1e293b] ${item.color} shrink-0 shadow-inner`}>
+                <Icon className="w-4 h-4" />
               </div>
               <div className="truncate min-w-0">
-                <h4 className="text-xs font-semibold text-slate-100 truncate">{item.label}</h4>
-                <p className="text-[11px] text-slate-400 truncate">{item.subtext}</p>
+                <h4 className="text-xs font-bold text-slate-100 truncate">{item.label}</h4>
+                <p className="text-[10px] text-slate-400 truncate mt-0.5">{item.subtext}</p>
               </div>
             </button>
           );
@@ -133,3 +133,5 @@ export const FeatureMenuSheet: React.FC<FeatureMenuSheetProps> = ({ isOpen, onCl
     </BottomSheet>
   );
 };
+
+export default FeatureMenuSheet;

@@ -70,7 +70,6 @@ export const ModalShell: React.FC<ModalShellProps> = ({
     previouslyFocusedElement.current = document.activeElement as HTMLElement | null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only process tab events if this modal is top-most
       if (!dialogStackManager.isTopDialog(uniqueId)) return;
 
       if (e.key === 'Tab' && modalRef.current) {
@@ -110,7 +109,6 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
 
-    // Initial focus on mount
     const timer = setTimeout(() => {
       if (modalRef.current) {
         const focusable = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -153,7 +151,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         }
         pointerDownOnBackdrop.current = false;
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 animate-fade-in"
     >
       <div
         ref={modalRef}
@@ -162,18 +160,21 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
-        className={`relative w-full ${maxWidthStyles} rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl flex flex-col max-h-[90vh] max-h-[90dvh] overflow-hidden focus:outline-none overscroll-contain`}
+        className={`relative w-full ${maxWidthStyles} rounded-lg bg-[#0e131d] border border-[#263348] shadow-[0_12px_40px_rgba(0,0,0,0.85)] flex flex-col max-h-[90vh] max-h-[90dvh] overflow-hidden focus:outline-none overscroll-contain`}
       >
+        {/* Top Gold/Cyan Accent Filament */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-amber-400/80 to-transparent shrink-0" aria-hidden="true" />
+
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/90 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            {icon && <div className="shrink-0 text-cyan-400" aria-hidden="true">{icon}</div>}
+        <header className="flex items-center justify-between px-4 py-3 border-b border-[#1e293b] bg-gradient-to-b from-[#161f2e] to-[#101723] shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {icon && <div className="shrink-0 text-amber-400" aria-hidden="true">{icon}</div>}
             <div className="min-w-0">
-              <h2 id={titleId} className="text-sm font-bold text-slate-100 truncate">
+              <h2 id={titleId} className="text-sm font-black tracking-wide text-slate-100 truncate">
                 {title}
               </h2>
               {description && (
-                <p id={descId} className="text-xs text-slate-400 truncate">
+                <p id={descId} className="text-[11px] text-slate-400 truncate mt-0.5">
                   {description}
                 </p>
               )}
@@ -186,20 +187,20 @@ export const ModalShell: React.FC<ModalShellProps> = ({
             size="sm"
             onClick={onClose}
             data-tutorial-target="modal-close-btn"
-            className="text-slate-400 hover:text-white shrink-0 ml-2"
+            className="text-slate-400 hover:text-slate-100 shrink-0 ml-2"
           >
             <X size={16} aria-hidden="true" />
           </IconButton>
         </header>
 
         {/* Body content with scroll containment */}
-        <div className="flex-1 overflow-y-auto p-4 overscroll-contain text-xs text-slate-200">
+        <div className="flex-1 overflow-y-auto p-3.5 overscroll-contain text-xs text-slate-200 bg-[#0a0e17]">
           {children}
         </div>
 
         {/* Optional Footer */}
         {footer && (
-          <footer className="px-4 py-3 border-t border-slate-800 bg-slate-950/60 shrink-0">
+          <footer className="px-4 py-3 border-t border-[#1e293b] bg-[#0d121c] shrink-0">
             {footer}
           </footer>
         )}
@@ -209,3 +210,5 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 
   return createPortal(modalJsx, dialogRoot);
 };
+
+export default ModalShell;

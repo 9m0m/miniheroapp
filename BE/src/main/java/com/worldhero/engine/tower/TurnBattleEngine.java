@@ -13,7 +13,7 @@ import java.util.*;
 @Slf4j
 public class TurnBattleEngine {
 
-    public static final int MAX_ROUNDS = 5;
+    public static final int MAX_ROUNDS = 10;
     public static final int STARTING_ENERGY = 2;
     public static final int MAX_ENERGY = 5;
 

@@ -17,8 +17,6 @@ export interface WorkshopSlice {
   };
   smartFusion: (itemIds: string[]) => Promise<any>;
   gemFusion: (gemType: string, tier: number) => Promise<string>;
-  inlayGem: (item: ItemInstance, gemId: string) => boolean;
-  inlayGemToItem: (item: ItemInstance, gemId: string) => boolean;
   brewAlchemy: (recipeId: string) => boolean;
   craftAccessory: (recipeId: string) => Promise<boolean> | boolean;
   brewBlessing: (type: string) => boolean;
@@ -321,28 +319,6 @@ export const createWorkshopSlice: StateCreator<any, [], [], WorkshopSlice> = (se
     addFloatingText?.(`Synthesized Tier ${tier + 1} ${gemType}!`, 180, 70, '#38BDF8');
     return `Tier ${tier + 1} ${gemType}`;
   },
-
-  inlayGem: (item, gemId) => {
-    const { inventory, addFloatingText } = get();
-    const currentSockets = item.sockets || [];
-    if (currentSockets.length >= 3) {
-      addFloatingText?.('Item already has maximum 3 sockets filled!', 180, 70, '#F87171', true);
-      return false;
-    }
-
-    const updated = inventory.map((i: ItemInstance) => {
-      if (i.id === item.id) {
-        return { ...i, sockets: [...currentSockets, gemId] };
-      }
-      return i;
-    });
-
-    set({ inventory: updated });
-    addFloatingText?.('Inlaid Gem successfully!', 180, 70, '#38BDF8');
-    return true;
-  },
-
-  inlayGemToItem: (item, gemId) => get().inlayGem(item, gemId),
 
   brewAlchemy: (_recipeId) => {
     const { gold, addFloatingText } = get();

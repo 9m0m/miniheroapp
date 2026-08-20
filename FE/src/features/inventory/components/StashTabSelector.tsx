@@ -34,18 +34,20 @@ export const StashTabSelector: React.FC<StashTabSelectorProps> = ({
                 onUnlockTab(tab);
               }
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap border ${
+            className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all whitespace-nowrap border cursor-pointer ${
               isActive
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/60 shadow-sm'
+                ? 'btn-game-amber shadow-sm'
                 : isUnlocked
-                ? 'bg-game-dark/60 text-slate-400 border-game-border/60 hover:text-slate-200'
-                : 'bg-game-dark/30 text-slate-500 border-dashed border-game-border/40 opacity-70 hover:opacity-100'
+                ? 'bg-[#0e131d] text-slate-300 border-[#1e293b] hover:text-slate-100'
+                : 'bg-[#0a0e17] text-slate-500 border-dashed border-[#1e293b] opacity-60 hover:opacity-90'
             }`}
           >
-            {!isUnlocked && <Lock size={10} className="text-amber-400/80" />}
+            {!isUnlocked && <Lock size={11} className="text-amber-400/80" />}
             <span>Tab {tab}</span>
             {isUnlocked && (
-              <span className="text-xs text-slate-400 font-mono">({count}/72)</span>
+              <span className={`text-[10px] font-mono ${isActive ? 'text-slate-950 font-black' : 'text-slate-400'}`}>
+                ({count}/72)
+              </span>
             )}
           </button>
         );
@@ -53,3 +55,5 @@ export const StashTabSelector: React.FC<StashTabSelectorProps> = ({
     </div>
   );
 };
+
+export default StashTabSelector;

@@ -16,17 +16,14 @@ export const TurnOrderStrip: React.FC<TurnOrderStripProps> = ({
   roundNumber,
 }) => {
   return (
-    <div className="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-2 py-1.5 flex items-center justify-between gap-2 overflow-x-auto select-none">
-      <div className="flex items-center gap-1.5 flex-shrink-0">
-        <span className="text-[10px] font-bold tracking-wider text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
+    <div className="w-full bg-[#0a0e17] border-b border-[#1e293b] px-3 py-2 flex items-center justify-between gap-2.5 overflow-x-auto select-none shadow-md shrink-0">
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className="text-xs font-black tracking-wider text-amber-300 bg-amber-500/25 px-2.5 py-1 rounded-md border border-amber-400/50 font-mono shadow-sm">
           R{roundNumber}
-        </span>
-        <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold hidden sm:inline">
-          Order
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
         {initiativeOrder.map((entity, index) => {
           const isActive = entity.entityId === activeEntityId;
           const isPlayer = entity.side === 'PLAYER';
@@ -35,25 +32,29 @@ export const TurnOrderStrip: React.FC<TurnOrderStripProps> = ({
           return (
             <div
               key={`${entity.entityId}-${index}`}
-              className={`relative flex items-center gap-1 px-1.5 py-0.5 rounded border transition-all duration-200 flex-shrink-0 ${
+              className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all duration-200 flex-shrink-0 ${
                 isActive
-                  ? 'bg-amber-500/20 border-amber-400 ring-1 ring-amber-400 scale-105 shadow-md shadow-amber-500/20'
+                  ? 'bg-amber-500/30 border-amber-300 ring-2 ring-amber-400 scale-105 shadow-[0_0_12px_rgba(245,158,11,0.6)] z-10'
                   : entity.isDowned
                   ? 'bg-slate-900/40 border-slate-800 opacity-40 grayscale'
                   : isPlayer
-                  ? 'bg-blue-950/40 border-blue-500/40'
-                  : 'bg-red-950/40 border-red-500/40'
+                  ? 'bg-blue-950/60 border-blue-500/50 shadow-sm'
+                  : 'bg-red-950/60 border-red-500/50 shadow-sm'
               }`}
             >
-              <span className="text-[10px]">{roleConfig.icon}</span>
+              <span className="text-xs">{roleConfig.icon}</span>
               <span
-                className={`text-[10px] font-bold truncate max-w-[65px] ${
-                  isActive ? 'text-amber-300' : isPlayer ? 'text-blue-300' : 'text-red-300'
+                className={`text-xs font-black truncate max-w-[85px] ${
+                  isActive
+                    ? 'text-amber-300'
+                    : isPlayer
+                    ? 'text-blue-200'
+                    : 'text-red-200'
                 }`}
               >
                 {entity.name}
               </span>
-              <span className="text-[9px] font-mono px-1 rounded bg-slate-900/80 text-slate-400 border border-slate-700/50">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-[#080b12] text-slate-300 border border-[#1e293b]">
                 {entity.effectiveStats?.speed || 100}
               </span>
             </div>
@@ -63,3 +64,5 @@ export const TurnOrderStrip: React.FC<TurnOrderStripProps> = ({
     </div>
   );
 };
+
+export default TurnOrderStrip;

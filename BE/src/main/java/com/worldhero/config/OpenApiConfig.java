@@ -16,7 +16,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("World Hero Mini-App API")
                         .version("1.0.0")
-                        .description("Tài liệu REST API cho game World Hero (Idle Party RPG trên World App)")
+                        .description("REST API Documentation for World Hero (Idle Party RPG on World App)")
                         .contact(new Contact().name("World Hero Dev Team"))
                         .license(new License().name("Apache 2.0")));
     }

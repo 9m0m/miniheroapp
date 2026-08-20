@@ -19,7 +19,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-blue-950/40',
     badge: 'bg-blue-500/20 text-blue-300 border-blue-400/40',
     text: 'text-blue-400',
-    icon: '🛡',
+    icon: 'T',
   },
   BRUISER: {
     primary: '#EF4444',
@@ -27,7 +27,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-red-950/40',
     badge: 'bg-red-500/20 text-red-300 border-red-400/40',
     text: 'text-red-400',
-    icon: '⚔',
+    icon: 'B',
   },
   ASSASSIN: {
     primary: '#A855F7',
@@ -35,7 +35,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-purple-950/40',
     badge: 'bg-purple-500/20 text-purple-300 border-purple-400/40',
     text: 'text-purple-400',
-    icon: '🗡',
+    icon: 'A',
   },
   MARKSMAN: {
     primary: '#22C55E',
@@ -43,7 +43,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-emerald-950/40',
     badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40',
     text: 'text-emerald-400',
-    icon: '🏹',
+    icon: 'M',
   },
   MAGE: {
     primary: '#06B6D4',
@@ -51,7 +51,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-cyan-950/40',
     badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40',
     text: 'text-cyan-400',
-    icon: '✦',
+    icon: 'M',
   },
   SUPPORT: {
     primary: '#F59E0B',
@@ -59,7 +59,7 @@ export const ROLE_COLOR_CONFIG: Record<
     bg: 'bg-amber-950/40',
     badge: 'bg-amber-500/20 text-amber-300 border-amber-400/40',
     text: 'text-amber-400',
-    icon: '✚',
+    icon: 'S',
   },
 };
 

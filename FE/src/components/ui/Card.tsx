@@ -3,8 +3,8 @@
 import React from 'react';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'base' | 'raised' | 'overlay';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  variant?: 'base' | 'raised' | 'overlay' | 'accent-amber' | 'accent-cyan';
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg';
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -15,21 +15,26 @@ export const Card: React.FC<CardProps> = ({
   ...props
 }) => {
   const variantStyles = {
-    base: 'bg-slate-950 border border-slate-850',
-    raised: 'bg-slate-900 border border-slate-800 shadow-sm',
-    overlay: 'bg-slate-850 border border-slate-700 shadow-md',
+    base: 'plate-base',
+    raised: 'plate-raised',
+    overlay: 'plate-overlay',
+    'accent-amber': 'plate-accent-amber',
+    'accent-cyan': 'plate-accent-cyan',
   }[variant];
 
   const paddingStyles = {
     none: 'p-0',
-    sm: 'p-2',
-    md: 'p-3',
+    xs: 'p-2',
+    sm: 'p-2.5',
+    md: 'p-3.5',
     lg: 'p-4',
   }[padding];
 
   return (
-    <div className={`rounded-xl ${variantStyles} ${paddingStyles} ${className}`} {...props}>
+    <div className={`rounded-lg ${variantStyles} ${paddingStyles} ${className}`} {...props}>
       {children}
     </div>
   );
 };
+
+export default Card;

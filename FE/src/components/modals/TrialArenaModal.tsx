@@ -120,7 +120,6 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
     const startTime = performance.now();
     let lastTime = startTime;
 
-    // Calculate total squad base DPS
     let squadBaseDps = 0;
     const activeHeroClasses: HeroClass[] = ['WARRIOR', 'RANGER', 'MAGE', 'PRIEST'];
     activeHeroClasses.forEach((hc: HeroClass) => {
@@ -159,7 +158,6 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
           return;
         }
       } else {
-        // Boss Speedrun
         trialStateRef.current.bossHp = Math.max(0, 50000 - trialStateRef.current.totalDmg);
         setBossHp(Math.round(trialStateRef.current.bossHp));
         setSpeedrunTimer(Math.round(elapsed * 100) / 100);
@@ -211,20 +209,20 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
         onClose={onClose}
         icon={<Trophy size={18} className="text-amber-400" />}
         title="Weekly Trial Arena"
-        description="Real combat DPS and speedrun leaderboard"
+        description="Benchmark squad DPS and compete on the realm leaderboard"
       >
         <div className="space-y-3">
           {/* Mode Navigation Tabs & Privacy Toggle */}
           <div className="flex items-center justify-between gap-2">
-            <div role="tablist" aria-label="Trial types" className="flex items-center gap-1.5 flex-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <div role="tablist" aria-label="Trial types" className="flex items-center gap-1.5 flex-1 bg-[#080b12] p-1 rounded-md border border-[#1e293b]">
               <button
                 type="button"
                 role="tab"
                 aria-selected={activeTab === 'DPS_30S'}
                 onClick={() => { setActiveTab('DPS_30S'); setIsPlaying(false); }}
-                className={`flex-1 py-1.5 rounded text-xs font-bold transition flex items-center justify-center gap-1 min-h-[36px] ${
+                className={`flex-1 py-1.5 rounded text-xs font-black transition flex items-center justify-center gap-1 min-h-[36px] cursor-pointer ${
                   activeTab === 'DPS_30S'
-                    ? 'bg-cyan-600 text-white shadow-sm'
+                    ? 'btn-game-cyan shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -237,9 +235,9 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                 role="tab"
                 aria-selected={activeTab === 'BOSS_SPEEDRUN'}
                 onClick={() => { setActiveTab('BOSS_SPEEDRUN'); setIsPlaying(false); }}
-                className={`flex-1 py-1.5 rounded text-xs font-bold transition flex items-center justify-center gap-1 min-h-[36px] ${
+                className={`flex-1 py-1.5 rounded text-xs font-black transition flex items-center justify-center gap-1 min-h-[36px] cursor-pointer ${
                   activeTab === 'BOSS_SPEEDRUN'
-                    ? 'bg-cyan-600 text-white shadow-sm'
+                    ? 'btn-game-cyan shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -251,36 +249,36 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
             <button
               type="button"
               onClick={handleTogglePrivacy}
-              className="flex items-center gap-1 text-xs font-bold px-2.5 py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-300 hover:text-white transition min-h-[44px]"
+              className="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-md border border-[#1e293b] bg-[#0e131d] text-slate-300 hover:text-white transition min-h-[38px] cursor-pointer"
               title="Toggle public showcase of your build"
             >
-              {isBuildPublic ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-amber-400" />}
+              {isBuildPublic ? <Eye size={13} className="text-emerald-400" /> : <EyeOff size={13} className="text-amber-400" />}
               <span>{isBuildPublic ? 'Public' : 'Private'}</span>
             </button>
           </div>
 
           {/* Live Combat Trial Arena Stage */}
-          <Card variant="base" padding="md" className="space-y-2.5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <div className="space-y-2 p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#1e293b] pb-2">
               <div className="flex items-center gap-2">
                 <Swords size={16} className="text-amber-400" aria-hidden="true" />
                 <div>
-                  <h4 className="text-xs font-bold text-slate-100">
-                    {activeTab === 'DPS_30S' ? 'Training Target Dummy' : 'Boss Speedrun Trial'}
+                  <h4 className="text-xs font-black text-slate-100">
+                    {activeTab === 'DPS_30S' ? 'Target Training Golem' : 'Boss Speedrun Trial'}
                   </h4>
-                  <span className="text-xs text-slate-400 font-mono">
-                    {activeTab === 'DPS_30S' ? '30s DPS Burst Benchmark' : 'Time-to-kill Challenge'}
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {activeTab === 'DPS_30S' ? '30s Damage Benchmark' : 'Time-to-kill Challenge'}
                   </span>
                 </div>
               </div>
 
               {!isPlaying ? (
-                <Button size="sm" variant="accent" onClick={startTrial}>
+                <Button size="sm" variant="accent" onClick={startTrial} className="font-black uppercase tracking-wider">
                   <Play size={12} className="mr-1 fill-current" aria-hidden="true" />
                   <span>Start</span>
                 </Button>
               ) : (
-                <span className="text-xs font-mono font-bold text-amber-400">
+                <span className="text-xs font-mono font-black text-amber-400 bg-[#080b12] px-2 py-0.5 rounded border border-amber-500/30">
                   {activeTab === 'DPS_30S' ? `${trialTimeLeft}s remaining` : `${speedrunTimer}s`}
                 </span>
               )}
@@ -288,30 +286,30 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
 
             {/* Combat Metrics Bar */}
             <div className="grid grid-cols-3 gap-1.5 text-center font-mono">
-              <div className="bg-slate-900 py-1.5 px-1 rounded-lg border border-slate-800">
-                <span className="text-xs text-slate-400 block uppercase">Live DPS</span>
-                <span className="text-amber-400 font-bold text-xs tabular-nums">{liveDps.toLocaleString()}</span>
+              <div className="bg-[#080b12] py-1.5 px-1 rounded border border-[#1e293b]">
+                <span className="text-[10px] text-slate-400 block uppercase font-sans">Live DPS</span>
+                <span className="text-amber-400 font-black text-xs tabular-nums">{liveDps.toLocaleString()}</span>
               </div>
-              <div className="bg-slate-900 py-1.5 px-1 rounded-lg border border-slate-800">
-                <span className="text-xs text-slate-400 block uppercase">Peak DPS</span>
-                <span className="text-cyan-300 font-bold text-xs tabular-nums">{peakDps.toLocaleString()}</span>
+              <div className="bg-[#080b12] py-1.5 px-1 rounded border border-[#1e293b]">
+                <span className="text-[10px] text-slate-400 block uppercase font-sans">Peak DPS</span>
+                <span className="text-cyan-300 font-black text-xs tabular-nums">{peakDps.toLocaleString()}</span>
               </div>
-              <div className="bg-slate-900 py-1.5 px-1 rounded-lg border border-slate-800">
-                <span className="text-xs text-slate-400 block uppercase">Total Dmg</span>
-                <span className="text-purple-300 font-bold text-xs tabular-nums">{totalDamage.toLocaleString()}</span>
+              <div className="bg-[#080b12] py-1.5 px-1 rounded border border-[#1e293b]">
+                <span className="text-[10px] text-slate-400 block uppercase font-sans">Total Dmg</span>
+                <span className="text-purple-300 font-black text-xs tabular-nums">{totalDamage.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Boss HP Bar for Speedrun */}
             {activeTab === 'BOSS_SPEEDRUN' && (
-              <div className="space-y-1">
+              <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-xs font-mono text-slate-400">
                   <span>Target HP:</span>
                   <span className="text-rose-400 font-bold tabular-nums">
                     {bossHp.toLocaleString()} / {bossMaxHp.toLocaleString()}
                   </span>
                 </div>
-                <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-[#080b12] h-1.5 rounded-full overflow-hidden border border-[#1e293b]">
                   <div
                     className="bg-rose-500 h-full rounded-full transition-all"
                     style={{ width: `${Math.max(0, (bossHp / bossMaxHp) * 100)}%` }}
@@ -319,11 +317,11 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                 </div>
               </div>
             )}
-          </Card>
+          </div>
 
           {/* Leaderboard Section */}
           <div className="space-y-1.5 max-h-[32vh] overflow-y-auto pr-0.5">
-            <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-1.5">
+            <div className="flex items-center justify-between text-xs text-slate-400 border-b border-[#1e293b] pb-1">
               <span className="font-bold text-slate-200 flex items-center gap-1">
                 <Crown size={14} className="text-amber-400" aria-hidden="true" />
                 <span>Realm Leaderboard</span>
@@ -332,7 +330,7 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                 type="button"
                 onClick={fetchLeaderboard}
                 aria-label="Refresh leaderboard"
-                className="hover:text-white transition p-1"
+                className="hover:text-white transition p-1 cursor-pointer"
               >
                 <RefreshCw size={12} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
               </button>
@@ -344,7 +342,7 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                 <span>Loading rankings...</span>
               </div>
             ) : leaderboard.length === 0 ? (
-              <div className="py-6 text-center text-slate-500 text-xs">
+              <div className="py-6 text-center text-slate-500 text-xs bg-[#0e131d] rounded-lg border border-[#1e293b]">
                 No records submitted yet this season.
               </div>
             ) : (
@@ -352,22 +350,20 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                 const rank = entry.rank || idx + 1;
 
                 return (
-                  <Card
+                  <div
                     key={entry.userId + '-' + idx}
-                    variant="raised"
-                    padding="sm"
-                    className="flex items-center justify-between gap-2"
+                    className="flex items-center justify-between gap-2 p-2 rounded-lg bg-[#0e131d] border border-[#1e293b]"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-6 text-center font-mono font-bold text-xs text-amber-400 shrink-0">
+                      <span className="w-6 text-center font-mono font-black text-xs text-amber-400 shrink-0">
                         #{rank}
                       </span>
 
                       <div className="min-w-0">
                         <h5 className="text-xs font-bold text-slate-100 truncate">{entry.username}</h5>
-                        <span className="text-xs text-slate-400 font-mono tabular-nums">
+                        <span className="text-[10px] text-slate-400 font-mono tabular-nums">
                           {activeTab === 'DPS_30S'
-                            ? `${entry.totalDamage.toLocaleString()} total damage`
+                            ? `${entry.totalDamage.toLocaleString()} total dmg`
                             : `${entry.timeTakenSec}s clear time`}
                         </span>
                       </div>
@@ -383,11 +379,11 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
                         variant="secondary"
                         onClick={() => handleInspectPlayer(entry.userId)}
                       >
-                        <Sparkles size={12} className="mr-1 text-purple-400" aria-hidden="true" />
+                        <Sparkles size={11} className="mr-1 text-purple-400" aria-hidden="true" />
                         <span>Inspect</span>
                       </Button>
                     </div>
-                  </Card>
+                  </div>
                 );
               })
             )}
@@ -404,3 +400,5 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
     </>
   );
 };
+
+export default TrialArenaModal;

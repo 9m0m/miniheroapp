@@ -267,18 +267,25 @@ public class TowerFloorConfigServiceImpl implements TowerFloorConfigService {
                         .gold(gold)
                         .essence(essence)
                         .stones(stones)
-                        .shards(shards)
+                        .shards(0)
                         .build())
                 .build());
     }
 
-        private TowerFloorDto.BotPreviewDto bot(String templateId, String name, HeroRole role, com.worldhero.model.enums.GridRow row, int level, int speed, int hp) {
-        com.worldhero.model.enums.GridCol col = com.worldhero.model.enums.GridCol.CENTER;
+    private TowerFloorDto.BotPreviewDto bot(String templateId, String name, HeroRole role, com.worldhero.model.enums.GridRow row, int level, int speed, int hp) {
+        com.worldhero.model.enums.GridCol col = (row == com.worldhero.model.enums.GridRow.FRONT)
+                ? com.worldhero.model.enums.GridCol.CENTER
+                : (row == com.worldhero.model.enums.GridRow.MID)
+                ? com.worldhero.model.enums.GridCol.LEFT
+                : com.worldhero.model.enums.GridCol.RIGHT;
+        com.worldhero.model.enums.GridRow normalizedRow = (row == com.worldhero.model.enums.GridRow.FRONT)
+                ? com.worldhero.model.enums.GridRow.FRONT
+                : com.worldhero.model.enums.GridRow.BACK;
         return TowerFloorDto.BotPreviewDto.builder()
                 .templateId(templateId)
                 .name(name)
                 .role(role)
-                .row(row)
+                .row(normalizedRow)
                 .col(col)
                 .level(level)
                 .speed(speed)

@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Crown,
 } from 'lucide-react';
+import { RARITY_COLORS } from '@/types/enums';
 
 export const EnhanceModal: React.FC = () => {
   const enhancingItem = useGameStore((state) => state.enhancingItem);
@@ -43,11 +44,8 @@ export const EnhanceModal: React.FC = () => {
     1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 25
   ];
 
-  // Cost calculations: Locked backend cost table (+1.5%/lvl, max +15, 100% success)
   const goldCost = currentLvl < 15 ? ENHANCE_GOLD_COSTS[currentLvl] : 0;
   const stonesCost = currentLvl < 15 ? ENHANCE_STONE_COSTS[currentLvl] : 0;
-  const successChance = 100;
-
   const canAfford = gold >= goldCost && enhanceStones >= stonesCost;
 
   const handleEnhance = async () => {
@@ -68,71 +66,75 @@ export const EnhanceModal: React.FC = () => {
     }
   };
 
-  const rarityVariant = `rarity-${enhancingItem.rarity.toLowerCase()}` as any;
+  const color = RARITY_COLORS[enhancingItem.rarity] || '#94A3B8';
 
   return (
     <ModalShell
       isOpen={!!enhancingItem}
       onClose={closeEnhanceModal}
       icon={<Hammer size={18} className="text-amber-400" />}
-      title="Forge & Enhance"
-      description="Deterministic Equipment Power Reinforcement"
+      title="Forge & Reinforce"
+      description="Deterministic Equipment Stat Scaling"
     >
-      <div className="space-y-3">
+      <div className="space-y-3 select-none">
         {/* Item Preview Card */}
-        <Card variant="base" padding="md" className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-xl border border-slate-700 bg-slate-950 flex items-center justify-center text-2xl shrink-0">
-            {template.icon}
+        <div className="flex items-center gap-3 p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg shadow-sm">
+          <div
+            style={{ borderColor: color, color }}
+            className="w-12 h-12 rounded-lg border-2 bg-[#080b12] flex items-center justify-center font-black text-xl shrink-0 shadow-inner"
+          >
+            {template.icon || template.name.charAt(0)}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-xs truncate text-slate-100">{template.name}</span>
-              <span className="text-amber-400 font-extrabold text-xs">+{currentLvl}</span>
+              <span className="text-amber-400 font-mono font-black text-xs">+{currentLvl}</span>
             </div>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant={rarityVariant} size="sm">
+            <div className="flex items-center gap-2 mt-0.5 font-mono text-[10px]">
+              <span style={{ color }} className="font-bold uppercase">
                 {enhancingItem.rarity}
-              </Badge>
-              <span className="text-xs text-slate-400 font-mono">iLvl {enhancingItem.itemLevel}</span>
+              </span>
+              <span>•</span>
+              <span className="text-slate-400">iLvl {enhancingItem.itemLevel}</span>
             </div>
-            <div className="text-xs text-emerald-400 mt-1 font-semibold">
-              +1.5% Base stats scaling per enhance level (Max +15)
+            <div className="text-[10px] text-emerald-400 mt-0.5 font-mono font-bold">
+              +1.5% Base stats per level (Max +15)
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Success Rate & Costs */}
         {!isMax ? (
-          <Card variant="raised" padding="md" className="space-y-2 text-xs">
+          <div className="space-y-1.5 p-3 bg-[#080b12] border border-[#1e293b] rounded-lg text-xs font-mono">
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Success Rate:</span>
-              <span className="font-bold font-mono text-emerald-400">
+              <span className="text-slate-400 font-sans">Success Chance:</span>
+              <span className="font-bold text-emerald-400">
                 100% (Guaranteed)
               </span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Gold Required:</span>
-              <span className={`font-mono font-semibold flex items-center gap-1 ${gold >= goldCost ? 'text-yellow-400' : 'text-rose-400'}`}>
+              <span className="text-slate-400 font-sans">Gold Required:</span>
+              <span className={`font-bold flex items-center gap-1 ${gold >= goldCost ? 'text-amber-400' : 'text-rose-400'}`}>
                 <Coins size={12} aria-hidden="true" />
                 <span>{goldCost.toLocaleString()} / {gold.toLocaleString()}</span>
               </span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-slate-400">Enhance Stones:</span>
-              <span className={`font-mono font-semibold flex items-center gap-1 ${enhanceStones >= stonesCost ? 'text-purple-400' : 'text-rose-400'}`}>
+              <span className="text-slate-400 font-sans">Enhance Stones:</span>
+              <span className={`font-bold flex items-center gap-1 ${enhanceStones >= stonesCost ? 'text-cyan-400' : 'text-rose-400'}`}>
                 <Hammer size={12} aria-hidden="true" />
                 <span>{stonesCost} / {enhanceStones}</span>
               </span>
             </div>
-          </Card>
+          </div>
         ) : (
-          <Card variant="raised" padding="md" className="text-center text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 border-amber-500/30">
+          <div className="p-3 bg-amber-950/40 rounded-lg text-center text-amber-300 font-black text-xs flex items-center justify-center gap-1.5 border border-amber-500/40">
             <Crown size={14} aria-hidden="true" />
-            <span>Equipment is at Maximum Enhance Level (+15)</span>
-          </Card>
+            <span>Equipment is at Maximum Enhancement (+15)</span>
+          </div>
         )}
 
         {/* Result Message */}
@@ -161,12 +163,13 @@ export const EnhanceModal: React.FC = () => {
             onClick={handleEnhance}
             disabled={!canAfford || isHammering}
             isLoading={isHammering}
+            className="font-black uppercase tracking-wider min-h-[44px]"
           >
             <Hammer size={14} className="mr-1" aria-hidden="true" />
-            <span>{isHammering ? 'Forging...' : `Enhance to +${currentLvl + 1}`}</span>
+            <span>{isHammering ? 'Forging Metal...' : `Reinforce to +${currentLvl + 1}`}</span>
           </Button>
         ) : (
-          <Button variant="secondary" fullWidth onClick={closeEnhanceModal}>
+          <Button variant="secondary" fullWidth onClick={closeEnhanceModal} className="min-h-[44px]">
             Close
           </Button>
         )}
@@ -174,3 +177,5 @@ export const EnhanceModal: React.FC = () => {
     </ModalShell>
   );
 };
+
+export default EnhanceModal;

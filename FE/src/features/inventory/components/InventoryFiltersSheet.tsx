@@ -60,20 +60,20 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
 }) => {
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} title="Inventory Filters">
-      <div className="flex flex-col gap-4 py-1 text-xs">
+      <div className="flex flex-col gap-3.5 py-1 text-xs select-none">
         {/* Class Filter */}
         <div>
-          <label className="text-slate-400 font-semibold mb-1.5 block">Hero Class</label>
+          <label className="text-slate-300 font-bold mb-1.5 block">Hero Class</label>
           <div className="grid grid-cols-3 gap-1.5">
             {CLASSES.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => onSelectClass(c.id)}
-                className={`py-2 px-2.5 rounded-lg border text-center transition min-h-[38px] cursor-pointer ${
+                className={`py-2 px-2 rounded-md border text-center transition min-h-[38px] cursor-pointer text-xs ${
                   selectedClass === c.id
-                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                    ? 'btn-game-cyan font-bold shadow-sm'
+                    : 'bg-[#0e131d] border-[#1e293b] text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {c.label}
@@ -84,15 +84,15 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
 
         {/* Equipment Slot Filter */}
         <div>
-          <label className="text-slate-400 font-semibold mb-1.5 block">Equipment Slot</label>
+          <label className="text-slate-300 font-bold mb-1.5 block">Equipment Slot</label>
           <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"
               onClick={() => onSelectSlot(null)}
-              className={`py-2 px-2.5 rounded-lg border text-center transition min-h-[38px] cursor-pointer ${
+              className={`py-2 px-2.5 rounded-md border text-center transition min-h-[38px] cursor-pointer text-xs ${
                 selectedSlot === null
-                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'btn-game-cyan font-bold shadow-sm'
+                  : 'bg-[#0e131d] border-[#1e293b] text-slate-400 hover:text-slate-200'
               }`}
             >
               All Slots
@@ -102,10 +102,10 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
                 key={s.id}
                 type="button"
                 onClick={() => onSelectSlot(s.id)}
-                className={`py-2 px-2.5 rounded-lg border text-center transition min-h-[38px] cursor-pointer ${
+                className={`py-2 px-2.5 rounded-md border text-center transition min-h-[38px] cursor-pointer text-xs ${
                   selectedSlot === s.id
-                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                    ? 'btn-game-cyan font-bold shadow-sm'
+                    : 'bg-[#0e131d] border-[#1e293b] text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {s.label}
@@ -116,7 +116,7 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
 
         {/* Rarity Filter */}
         <div>
-          <label className="text-slate-400 font-semibold mb-1.5 block">Rarity Tier</label>
+          <label className="text-slate-300 font-bold mb-1.5 block">Rarity Tier</label>
           <div className="grid grid-cols-4 gap-1.5">
             {RARITIES.map((r) => {
               const isSelected = selectedRarity === r;
@@ -126,12 +126,12 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
                   key={r}
                   type="button"
                   onClick={() => onSelectRarity(r)}
-                  className={`py-2 px-2 rounded-lg border text-center transition min-h-[38px] cursor-pointer font-medium ${
+                  className={`py-2 px-2 rounded-md border text-center transition min-h-[38px] cursor-pointer font-bold text-xs ${
                     isSelected
-                      ? 'bg-slate-800 border-white text-white font-bold'
-                      : 'bg-slate-900 border-slate-800 hover:bg-slate-850'
+                      ? 'bg-slate-800 border-amber-400 text-amber-300 shadow-sm'
+                      : 'bg-[#0e131d] border-[#1e293b] hover:bg-[#131926]'
                   }`}
-                  style={{ color: isSelected ? '#FFFFFF' : color }}
+                  style={{ color: isSelected ? '#FDE68A' : color }}
                 >
                   {r === 'ALL' ? 'All' : r}
                 </button>
@@ -141,7 +141,7 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-slate-800">
+        <div className="flex gap-2 pt-2 border-t border-[#1e293b]">
           <Button variant="secondary" onClick={onReset} className="flex-1 min-h-[44px]">
             Reset Filters
           </Button>
@@ -153,3 +153,5 @@ export const InventoryFiltersSheet: React.FC<InventoryFiltersSheetProps> = ({
     </BottomSheet>
   );
 };
+
+export default InventoryFiltersSheet;

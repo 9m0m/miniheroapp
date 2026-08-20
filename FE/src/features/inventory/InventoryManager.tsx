@@ -7,7 +7,7 @@ import { ItemInstance, ItemTemplate } from '../../types/item.types';
 import { StashTabSelector } from './components/StashTabSelector';
 import { ItemInspectionDrawer } from './components/ItemInspectionDrawer';
 import { InventoryFiltersSheet } from './components/InventoryFiltersSheet';
-import { ArrowUpDown, Filter, PackageOpen, Sparkles, Shield } from 'lucide-react';
+import { ArrowUpDown, Filter, PackageOpen, Sparkles, Shield, Key } from 'lucide-react';
 
 export default function InventoryManager() {
   const inventory = useGameStore((state) => state.inventory);
@@ -92,16 +92,16 @@ export default function InventoryManager() {
   const backpackCount = inventory.length;
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 overflow-y-auto p-3 max-w-lg mx-auto select-none text-white text-xs">
+    <div className="w-full flex-1 flex flex-col min-h-0 overflow-y-auto p-3 max-w-lg mx-auto select-none text-white text-xs bg-[#06080e] pb-6">
       {/* 1. Context Switcher: Backpack vs Stash & Sort/Filter Controls */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+      <div className="flex items-center justify-between gap-2 mb-2.5">
+        <div className="flex items-center gap-1 bg-[#0a0e17] p-1 rounded-lg border border-[#1e293b] shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab('BACKPACK')}
-            className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition cursor-pointer min-h-[36px] ${
+            className={`px-3 py-1.5 rounded-md font-bold text-xs transition cursor-pointer min-h-[36px] ${
               activeTab === 'BACKPACK'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                ? 'btn-game-amber shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -111,13 +111,13 @@ export default function InventoryManager() {
           <button
             type="button"
             onClick={() => setActiveTab('STASH')}
-            className={`px-3 py-1.5 rounded-lg font-semibold text-xs transition cursor-pointer min-h-[36px] ${
+            className={`px-3 py-1.5 rounded-md font-bold text-xs transition cursor-pointer min-h-[36px] ${
               activeTab === 'STASH'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                ? 'btn-game-amber shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Stash
+            Vault Stash
           </button>
         </div>
 
@@ -127,7 +127,7 @@ export default function InventoryManager() {
             type="button"
             onClick={sortInventory}
             aria-label="Sort Inventory"
-            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition active:scale-95 flex items-center justify-center min-w-[38px] min-h-[38px] cursor-pointer"
+            className="p-2 rounded-md btn-game-dark text-slate-300 transition flex items-center justify-center min-w-[38px] min-h-[38px] cursor-pointer active:scale-95"
             title="Sort Items"
           >
             <ArrowUpDown size={15} />
@@ -138,16 +138,16 @@ export default function InventoryManager() {
             type="button"
             onClick={() => setIsFilterSheetOpen(true)}
             aria-label="Open Inventory Filters"
-            className={`p-2 rounded-lg border transition active:scale-95 flex items-center justify-center gap-1 min-w-[38px] min-h-[38px] cursor-pointer ${
+            className={`p-2 rounded-md border transition flex items-center justify-center gap-1 min-w-[38px] min-h-[38px] cursor-pointer active:scale-95 ${
               activeFilterCount > 0
-                ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800'
+                ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                : 'btn-game-dark text-slate-300'
             }`}
             title="Filters"
           >
             <Filter size={15} />
             {activeFilterCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-bold flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -157,7 +157,7 @@ export default function InventoryManager() {
 
       {/* Stash Tab Selector (Only shown in STASH context) */}
       {activeTab === 'STASH' && (
-        <div className="mb-3">
+        <div className="mb-2.5">
           <StashTabSelector
             activeTab={activeStashTab}
             unlockedTabs={unlockedStashTabs}
@@ -169,28 +169,28 @@ export default function InventoryManager() {
       )}
 
       {/* 2. Category Filter Ribbon */}
-      <div className="grid grid-cols-4 gap-1.5 mb-3">
+      <div className="grid grid-cols-4 gap-1.5 mb-2.5">
         {(['ALL', 'GEAR', 'MATERIALS', 'KEYS'] as const).map((cat) => (
           <button
             key={cat}
             type="button"
             onClick={() => setCategoryFilter(cat)}
-            className={`py-1.5 px-2 rounded-lg border text-center font-semibold text-xs transition cursor-pointer min-h-[36px] ${
+            className={`py-1.5 px-2 rounded-md border text-center font-bold text-xs transition cursor-pointer min-h-[36px] ${
               categoryFilter === cat
-                ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-sm'
-                : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:text-slate-200'
+                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-sm'
+                : 'bg-[#0e131d] border-[#1e293b] text-slate-400 hover:text-slate-200'
             }`}
           >
-            {cat === 'ALL' ? 'All' : cat === 'GEAR' ? 'Gear' : cat === 'MATERIALS' ? 'Materials' : 'Keys'}
+            {cat === 'ALL' ? 'All Items' : cat === 'GEAR' ? 'Equipment' : cat === 'MATERIALS' ? 'Materials' : 'Vault Keys'}
           </button>
         ))}
       </div>
 
-      {/* 3. Items Grid (4 Columns, No Empty Slot Walls) */}
+      {/* 3. Items Grid (4 Columns, Game Inventory Matrix) */}
       {filteredItems.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 rounded-xl bg-slate-900/60 border border-slate-800 text-center gap-2 mt-2">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 rounded-lg bg-[#0e131d] border border-[#1e293b] text-center gap-2 mt-2 shadow-inner">
           <PackageOpen className="w-10 h-10 text-slate-600" />
-          <h4 className="text-sm font-semibold text-slate-300">No items found</h4>
+          <h4 className="text-sm font-bold text-slate-300">No items found</h4>
           <p className="text-xs text-slate-500 max-w-xs">
             {activeFilterCount > 0
               ? 'No items match your active filter criteria. Try resetting filters.'
@@ -202,14 +202,14 @@ export default function InventoryManager() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="mt-2 px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 text-xs font-semibold cursor-pointer"
+              className="mt-2 px-3 py-1.5 rounded-md btn-game-cyan text-xs font-bold cursor-pointer"
             >
               Reset Filters
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
           {filteredItems.map((item) => {
             const tpl = templates[item.templateId] || {
               id: item.templateId,
@@ -233,35 +233,35 @@ export default function InventoryManager() {
                     isInStash: activeTab === 'STASH',
                   })
                 }
-                className="relative flex flex-col items-center justify-between p-2 rounded-xl bg-slate-900 border hover:brightness-110 active:scale-95 transition min-h-[64px] cursor-pointer"
-                style={{ borderColor: `${rarityColor}66` }}
+                className="relative flex flex-col items-center justify-between p-2 rounded-md bg-[#101623] border hover:brightness-110 active:scale-95 transition min-h-[66px] cursor-pointer shadow-sm"
+                style={{ borderColor: `${rarityColor}77` }}
               >
-                {/* Rarity Indicator Strip */}
+                {/* Rarity Indicator Top Strip */}
                 <div
-                  className="w-full h-1 rounded-full mb-1"
+                  className="w-full h-[2px] rounded-full mb-1"
                   style={{ backgroundColor: rarityColor }}
                 />
 
-                {/* Item Icon Placeholder / Graphic */}
-                <div className="w-8 h-8 flex items-center justify-center text-slate-300">
+                {/* Item Icon Placeholder */}
+                <div className="w-7 h-7 flex items-center justify-center text-slate-300 bg-[#080b12] rounded border border-[#1e293b] shadow-inner">
                   {tpl.itemType === 'ACCESSORY' ? (
-                    <Sparkles className="w-5 h-5 text-purple-400" />
+                    <Sparkles className="w-4 h-4 text-purple-400" />
                   ) : tpl.itemType === 'KEY' ? (
-                    <Shield className="w-5 h-5 text-amber-400" />
+                    <Key className="w-4 h-4 text-amber-400" />
                   ) : (
-                    <Shield className="w-5 h-5 text-cyan-400" />
+                    <Shield className="w-4 h-4 text-cyan-400" />
                   )}
                 </div>
 
                 {/* Enhancement Level Badge */}
                 {item.enhanceLevel > 0 && (
-                  <span className="absolute top-1.5 right-1.5 text-[10px] font-bold text-amber-300 bg-slate-950/80 px-1 rounded border border-amber-500/40">
+                  <span className="absolute top-1 right-1 text-[9px] font-black text-amber-300 bg-slate-950/90 px-1 rounded border border-amber-500/50 shadow">
                     +{item.enhanceLevel}
                   </span>
                 )}
 
                 {/* Item Name */}
-                <span className="text-[11px] font-medium text-slate-200 truncate w-full text-center mt-1">
+                <span className="text-[10px] font-bold text-slate-200 truncate w-full text-center mt-1">
                   {tpl.name}
                 </span>
               </button>

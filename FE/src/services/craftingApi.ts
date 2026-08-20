@@ -2,30 +2,6 @@ import { apiClient } from './client';
 import { ItemInstance } from '../types/game.types';
 
 export const craftingApi = {
-  /**
-   * Khảm ngọc vào lỗ trống trên trang bị.
-   */
-  inlayGem: async (userId: string, itemInstanceId: string, gemId: string): Promise<ItemInstance> => {
-    const res = await apiClient.post<ItemInstance>('/crafting/inlay-gem', {
-      userId,
-      itemInstanceId,
-      gemId,
-    });
-    return res.data;
-  },
-
-  /**
-   * Tháo ngọc ra khỏi trang bị.
-   */
-  removeGem: async (userId: string, itemInstanceId: string, gemId: string, socketIndex: number): Promise<ItemInstance> => {
-    const res = await apiClient.post<ItemInstance>('/crafting/remove-gem', {
-      userId,
-      itemInstanceId,
-      gemId,
-      socketIndex,
-    });
-    return res.data;
-  },
 
   /**
    * Ép Giấy Chúc Phúc lên trang bị.

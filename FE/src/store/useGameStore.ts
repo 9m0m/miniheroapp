@@ -41,15 +41,12 @@ export interface GameStoreState
   resetUserSession: () => void;
 }
 
-// Starter level 1 items for brand new player
 const INITIAL_STARTER_BAG: ItemInstance[] = [
   { id: 'bag_init_swd', templateId: 'wpn_iron_sword', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
   { id: 'bag_init_shd', templateId: 'shd_iron_shield', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
   { id: 'bag_init_bow', templateId: 'wpn_hunting_bow', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
   { id: 'bag_init_wnd', templateId: 'wpn_apprentice_wand', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
   { id: 'bag_init_orb', templateId: 'wpn_void_orb', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
-  { id: 'bag_init_mce', templateId: 'wpn_holy_mace', itemLevel: 1, rarity: 'COMMON', enhanceLevel: 0, sockets: [] },
-  { id: 'bag_init_rng', templateId: 'acc_ruby_ring', itemLevel: 1, rarity: 'UNCOMMON', enhanceLevel: 0, sockets: [] },
 ];
 
 export const useGameStore = create<GameStoreState>()(
@@ -76,7 +73,9 @@ export const useGameStore = create<GameStoreState>()(
       // Hydrate state from Spring Boot Backend
       fetchInitialData: async () => {
         try {
-          set({ sessionStatus: 'bootstrapping' });
+          if (get().sessionStatus !== 'ready') {
+            set({ sessionStatus: 'bootstrapping' });
+          }
 
           // Auto-authenticate with World App or Local Dev session
           await authenticateUser().catch(() => null);
@@ -184,11 +183,15 @@ export const useGameStore = create<GameStoreState>()(
                 });
               }
 
+              const cleanName = h.name && !h.name.startsWith('hero.')
+                ? h.name
+                : (h.heroTemplateId === 'hero.knight' ? 'Knight' : h.heroTemplateId === 'hero.ranger' ? 'Ranger' : (h.name || h.heroTemplateId || 'Hero'));
+
               const heroObj: any = {
                 id: h.id,
-                name: h.name || h.heroTemplateId || 'Hero',
+                name: cleanName,
                 role: h.role || (h.heroTemplateId?.includes('knight') ? 'TANK' : h.heroTemplateId?.includes('ranger') ? 'MARKSMAN' : 'BRUISER'),
-                heroClass: h.heroClass || null,
+                heroClass: h.heroClass || (h.heroTemplateId?.includes('knight') ? 'WARRIOR' : h.heroTemplateId?.includes('ranger') ? 'RANGER' : 'WARRIOR'),
                 level: h.level || 1,
                 stars: h.stars || 1,
                 shards: h.shards || 0,

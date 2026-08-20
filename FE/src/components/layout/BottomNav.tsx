@@ -65,7 +65,7 @@ export default function BottomNav({ activeTab, onSelectTab }: BottomNavProps) {
     <nav
       role="tablist"
       aria-label="Main game views"
-      className="bg-slate-900/95 border-t border-slate-800 py-1 px-2 flex justify-around items-center z-20 select-none shadow-lg backdrop-blur-md pb-[max(0.25rem,env(safe-area-inset-bottom))]"
+      className="bg-gradient-to-b from-[#131926] to-[#0a0e17] border-t border-[#222d3d] py-1 px-2 flex justify-around items-center z-20 select-none shadow-[0_-4px_20px_rgba(0,0,0,0.7)] pb-[max(0.35rem,env(safe-area-inset-bottom))]"
     >
       {tabs.map((tab, idx) => {
         const Icon = tab.icon;
@@ -87,20 +87,24 @@ export default function BottomNav({ activeTab, onSelectTab }: BottomNavProps) {
             tabIndex={isActive ? 0 : -1}
             onClick={() => handleTabClick(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl min-h-[44px] min-w-[60px] transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+            className={`relative flex flex-col items-center justify-center gap-1 py-1 px-3 rounded-md min-h-[44px] min-w-[64px] transition-[color,background,transform] duration-150 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
               isActive
-                ? 'text-amber-400 bg-amber-400/10 font-bold shadow-sm'
+                ? 'text-amber-400 bg-amber-500/10 font-bold shadow-inner'
                 : isLocked
                 ? 'text-slate-600 opacity-40 cursor-not-allowed'
                 : 'text-slate-400 hover:text-slate-200 active:scale-95'
             }`}
           >
+            {/* Active Top Glow Pip */}
+            {isActive && (
+              <span className="absolute -top-1 w-6 h-[2px] bg-amber-400 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]" aria-hidden="true" />
+            )}
             <Icon
               size={18}
-              className={isActive ? 'text-amber-400' : isLocked ? 'text-slate-600' : 'text-slate-400'}
+              className={isActive ? 'text-amber-400 drop-shadow-[0_0_4px_rgba(245,158,11,0.4)]' : isLocked ? 'text-slate-600' : 'text-slate-400'}
               aria-hidden="true"
             />
-            <span className="text-xs">{tab.label}</span>
+            <span className="text-[10px] tracking-wider uppercase font-semibold">{tab.label}</span>
           </button>
         );
       })}

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.worldhero.dto.*;
 import com.worldhero.engine.tower.*;
 import com.worldhero.exception.GameRuleViolationException;
+import com.worldhero.exception.IdempotencyConflictException;
 import com.worldhero.model.entity.*;
 import com.worldhero.model.enums.*;
 import com.worldhero.repository.*;
@@ -197,10 +198,6 @@ public class TowerServiceImpl implements TowerService {
                 .orElseThrow(() -> new GameRuleViolationException("User not found: " + userId));
 
         // 2. Idempotency check under lock
-        if (request.getIdempotencyKey() == null || request.getIdempotencyKey().isBlank()) {
-            throw new IllegalArgumentException("idempotencyKey is required for tower attempt");
-        }
-
         List<TowerPartyGridSlotDto> sortedSlots = request.getSlots() != null
                 ? request.getSlots().stream()
                 .sorted(Comparator.comparing((TowerPartyGridSlotDto s) -> s.getHeroId() != null ? s.getHeroId().toString() : ""))
@@ -208,33 +205,30 @@ public class TowerServiceImpl implements TowerService {
                 : List.of();
 
         Map<String, SkillPolicy> sortedPolicies = request.getHeroPolicies() != null
-                ? new TreeMap<>(request.getHeroPolicies().entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)))
-                : Collections.emptyMap();
+                ? new TreeMap<>(request.getHeroPolicies().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)))
+                : Map.of();
 
         List<String> sortedEnergyPriority = request.getEnergyPriority() != null
                 ? request.getEnergyPriority().stream().map(UUID::toString).toList()
                 : List.of();
 
-        String inputHash = IdempotencyHelper.computeHash(
-                request.getFloorNumber() + ":" +
-                writeJson(sortedSlots) + ":" +
-                (request.getTactic() != null ? request.getTactic().name() : "BALANCED") + ":" +
-                writeJson(sortedPolicies) + ":" +
-                writeJson(sortedEnergyPriority) + ":" +
-                "CORE_V2_GRID"
+        Map<String, Object> inputPayload = Map.of(
+                "floorNumber", request.getFloorNumber(),
+                "slots", sortedSlots,
+                "tactic", request.getTactic() != null ? request.getTactic().name() : "BALANCED",
+                "heroPolicies", sortedPolicies,
+                "energyPriority", sortedEnergyPriority
         );
+        String inputHash = IdempotencyHelper.computeHash(inputPayload);
 
-        Optional<TowerAttemptEntity> cachedAttempt = attemptRepository.findByUserIdAndIdempotencyKey(
-                user.getId(), request.getIdempotencyKey()
-        );
-        if (cachedAttempt.isPresent()) {
-            TowerAttemptEntity existingAttempt = cachedAttempt.get();
-            if (existingAttempt.getInputHash() != null && !inputHash.equals(existingAttempt.getInputHash())) {
-                throw new com.worldhero.exception.IdempotencyConflictException("TOWER_ATTEMPT", request.getIdempotencyKey());
+        Optional<TowerAttemptEntity> cachedAttemptOpt = attemptRepository.findByUserIdAndIdempotencyKey(user.getId(), request.getIdempotencyKey());
+        if (cachedAttemptOpt.isPresent()) {
+            TowerAttemptEntity cached = cachedAttemptOpt.get();
+            if (cached.getInputHash() != null && !cached.getInputHash().equals(inputHash)) {
+                throw new IdempotencyConflictException("TOWER_ATTEMPT", request.getIdempotencyKey());
             }
-            log.info("Returning cached attempt for idempotencyKey: {}", request.getIdempotencyKey());
-            return mapAttemptToResponseDto(existingAttempt);
+            log.info("Returning cached tower attempt for idempotencyKey={}", request.getIdempotencyKey());
+            return mapAttemptToResponseDto(cached);
         }
 
         TowerProgressEntity progress = getOrCreateProgress(user);
@@ -247,20 +241,44 @@ public class TowerServiceImpl implements TowerService {
             throw new GameRuleViolationException("Floor " + floorNum + " is locked. Highest cleared: " + progress.getHighestFloorCleared());
         }
 
-        // Build player combatants from the Core v2 grid.
-        List<TowerEntity> combatants = new ArrayList<>();
+        // Build player combatants from the 3x2 grid with strict uniqueness and collision checks
         List<TowerPartyGridSlotDto> slots = request.getSlots();
-
-        if (slots != null && slots.size() == 3) {
-            for (int i = 0; i < slots.size(); i++) {
-                TowerPartyGridSlotDto slot = slots.get(i);
-                UUID hid = slot.getHeroId();
-                SkillPolicy policy = request.getHeroPolicies() != null ? request.getHeroPolicies().getOrDefault(hid, SkillPolicy.AUTO) : SkillPolicy.AUTO;
-                int priority = request.getEnergyPriority() != null ? (request.getEnergyPriority().indexOf(hid) != -1 ? request.getEnergyPriority().indexOf(hid) + 1 : i + 1) : i + 1;
-                combatants.add(buildPlayerCombatantV2(user, hid, slot.getRow(), slot.getCol(), policy, priority, "player_" + (i + 1)));
-            }
-        } else {
+        if (slots == null || slots.size() != 3) {
             throw new GameRuleViolationException("Tower attempt requires exactly 3 Core v2 grid slots");
+        }
+
+        Set<String> occupiedCells = new HashSet<>();
+        Set<UUID> heroIds = new HashSet<>();
+
+        for (TowerPartyGridSlotDto slot : slots) {
+            if (slot.getHeroId() == null || slot.getRow() == null || slot.getCol() == null) {
+                throw new GameRuleViolationException("Slot must contain heroId, row, and col");
+            }
+            if (!heroIds.add(slot.getHeroId())) {
+                throw new GameRuleViolationException("Cannot place duplicate hero in attempt: " + slot.getHeroId());
+            }
+            com.worldhero.model.enums.GridRow row = (slot.getRow() == com.worldhero.model.enums.GridRow.FRONT)
+                    ? com.worldhero.model.enums.GridRow.FRONT
+                    : com.worldhero.model.enums.GridRow.BACK;
+            com.worldhero.model.enums.GridCol col = slot.getCol();
+            String cellKey = row.name() + "_" + col.name();
+            if (!occupiedCells.add(cellKey)) {
+                throw new GameRuleViolationException("Multiple heroes cannot occupy the same grid cell: " + cellKey);
+            }
+        }
+
+        List<TowerEntity> combatants = new ArrayList<>();
+        for (int i = 0; i < slots.size(); i++) {
+            TowerPartyGridSlotDto slot = slots.get(i);
+            UUID hid = slot.getHeroId();
+            com.worldhero.model.enums.GridRow row = (slot.getRow() == com.worldhero.model.enums.GridRow.FRONT)
+                    ? com.worldhero.model.enums.GridRow.FRONT
+                    : com.worldhero.model.enums.GridRow.BACK;
+            com.worldhero.model.enums.GridCol col = slot.getCol();
+
+            SkillPolicy policy = request.getHeroPolicies() != null ? request.getHeroPolicies().getOrDefault(hid, SkillPolicy.AUTO) : SkillPolicy.AUTO;
+            int priority = request.getEnergyPriority() != null ? (request.getEnergyPriority().indexOf(hid) != -1 ? request.getEnergyPriority().indexOf(hid) + 1 : i + 1) : i + 1;
+            combatants.add(buildPlayerCombatantV2(user, hid, row, col, policy, priority, "player_" + (i + 1)));
         }
 
         // Build Enemy Combatants
