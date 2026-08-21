@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false, // Tối ưu cho Canvas render loop
-  allowedDevOrigins: ['*.trycloudflare.com', '*.loca.lt', '*.ngrok-free.app', '*.pinggy.link', 'localhost:3000', 'localhost:3001'],
+  allowedDevOrigins: ['*.trycloudflare.com', '*.loca.lt', '*.ngrok-free.app', '*.pinggy.link', '26.75.160.110:3000', '26.75.160.110', 'localhost:3000', 'localhost:3001'],
   async rewrites() {
     return [
       {
