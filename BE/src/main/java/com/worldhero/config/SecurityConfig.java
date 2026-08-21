@@ -55,6 +55,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Explicit Public Login / Verification Endpoints
                         .requestMatchers(
@@ -91,14 +98,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        List<String> origins = Arrays.stream(allowedOriginsConfig.split(","))
-                .map(String::trim)
-                .filter(StringUtils::hasText)
-                .toList();
-
-        config.setAllowedOrigins(origins.isEmpty() ? List.of("http://localhost:3000") : origins);
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "X-Mock-User-Id"));
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "X-Mock-User-Id",
+                "X-Operation-Key",
+                "ngrok-skip-browser-warning",
+                "bypass-tunnel-reminder"
+        ));
+        config.setExposedHeaders(List.of("Authorization", "X-Total-Count"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

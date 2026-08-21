@@ -142,6 +142,7 @@ apiClient.interceptors.response.use(
 
     const isSessionDead =
       status === 401 ||
+      status === 403 ||
       errorCode === 'USER_NOT_FOUND' ||
       (status === 404 && message.toLowerCase().includes('user'));
 
