@@ -42,7 +42,7 @@ export const TowerLobby: React.FC<TowerLobbyProps> = ({
           </div>
           <div>
             <h1 className="text-sm font-black tracking-tight text-slate-100">The Infinite Tower</h1>
-            <p className="text-[10px] text-slate-400 font-mono">Season 1 · 3×2 Tactical Strategy</p>
+            <p className="text-[10px] text-slate-400 font-mono">Season 1 · 3×2 Formation</p>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export const TowerLobby: React.FC<TowerLobbyProps> = ({
             className="flex items-center gap-1 px-2 py-1 rounded-md bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-[11px] font-bold cursor-pointer hover:bg-cyan-900/80 transition-colors"
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Tactical Rules</span>
+            <span>Rules</span>
           </button>
           {onClose && (
             <button
@@ -78,8 +78,7 @@ export const TowerLobby: React.FC<TowerLobbyProps> = ({
             </span>
           </div>
 
-          <h2 className="text-sm font-black text-slate-100 mb-0.5">{currentFloor.name}</h2>
-          <p className="text-[11px] text-slate-400 mb-3 line-clamp-1">{currentFloor.description}</p>
+          <h2 className="text-sm font-black text-slate-100 mb-2">{currentFloor.name}</h2>
 
           <button
             onClick={() => onSelectFloor(currentFloor)}
@@ -202,49 +201,40 @@ export const TowerLobby: React.FC<TowerLobbyProps> = ({
       <ModalShell
         isOpen={showTacticalGuide}
         onClose={() => setShowTacticalGuide(false)}
-        title="3×2 Tactical Combat Rules"
+        title="3×2 Tactical Rules"
         icon={<BookOpen size={18} className="text-cyan-400" />}
       >
-        <div className="space-y-2.5 text-xs text-slate-200 select-none max-h-[50vh] overflow-y-auto pr-0.5">
-          <div className="p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-amber-300">
-              <Shield size={15} className="text-blue-400 shrink-0" />
-              <span>1. 3×2 Grid & Column Line-of-Sight</span>
+        <div className="space-y-2 text-xs text-slate-200 select-none max-h-[50vh] overflow-y-auto pr-0.5">
+          <div className="p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg flex items-start gap-2.5">
+            <Shield size={16} className="text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-slate-100">Frontline & Backline: </span>
+              <span className="text-slate-400">Frontline tanks direct melee strikes; Backline is protected until the front falls.</span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Heroes in the <strong>FRONTLINE</strong> (Vanguard) absorb direct melee attacks, guarding the <strong>BACKLINE</strong> in the same column until the frontline hero falls.
-            </p>
           </div>
 
-          <div className="p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-cyan-300">
-              <Zap size={15} className="text-cyan-400 shrink-0" />
-              <span>2. Speed & Initiative Turn Order</span>
+          <div className="p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg flex items-start gap-2.5">
+            <Zap size={16} className="text-cyan-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-slate-100">Speed (SPD): </span>
+              <span className="text-slate-400">Turn order each round is determined by combatant Speed.</span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Every round, all 6 combatants act in order of their <strong>Speed (SPD)</strong> attribute shown on the live <strong>Initiative Ribbon</strong>.
-            </p>
           </div>
 
-          <div className="p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-purple-300">
-              <Sparkles size={15} className="text-purple-400 shrink-0" />
-              <span>3. Team Energy & Burst Skills</span>
+          <div className="p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg flex items-start gap-2.5">
+            <Sparkles size={16} className="text-purple-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-slate-100">Team Energy: </span>
+              <span className="text-slate-400">+1 Energy per round (max 5) to cast hero skills.</span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Team Energy increases by <strong>+1 each round</strong> (up to 5 max), empowering hero skills.
-            </p>
           </div>
 
-          <div className="p-3 bg-[#0e131d] border border-[#1e293b] rounded-lg space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-emerald-300">
-              <Crosshair size={15} className="text-emerald-400 shrink-0" />
-              <span>4. Tactical Directives & 10-Round Cap</span>
+          <div className="p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg flex items-start gap-2.5">
+            <Crosshair size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-slate-100">10-Round Cap: </span>
+              <span className="text-slate-400">Defeat all 3 enemies within 10 rounds to clear the floor.</span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Customize Team Tactics (<em>Balanced, Focus Low HP, Backline Pressure, Defensive</em>).
-              Defeat all enemies within <strong>10 rounds</strong> to clear the floor!
-            </p>
           </div>
         </div>
       </ModalShell>

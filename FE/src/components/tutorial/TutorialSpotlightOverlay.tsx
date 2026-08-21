@@ -37,8 +37,8 @@ function resolveTutorialConfig(
         title: 'Mission 1: Summon Champion',
         message:
           activeModal === 'RECRUITMENT'
-            ? 'Tap the Summon button to recruit your frontline champion.'
-            : 'Tap the Altar of Heroes to recruit your frontline guardian.',
+            ? 'Tap Summon to recruit your 1st champion.'
+            : 'Visit the Altar of Heroes to recruit your 1st champion.',
       };
 
     case 'SUMMON_RANGER_REQUIRED':
@@ -50,8 +50,8 @@ function resolveTutorialConfig(
         title: 'Mission 2: Recruit 2nd Champion',
         message:
           activeModal === 'RECRUITMENT'
-            ? 'Tap Summon to recruit your second squad champion.'
-            : 'Tap the Altar of Heroes to recruit your second champion.',
+            ? 'Tap Summon to recruit your 2nd champion.'
+            : 'Visit the Altar of Heroes to recruit your 2nd champion.',
       };
 
     case 'FIRST_EXPEDITION_REQUIRED':
@@ -63,8 +63,8 @@ function resolveTutorialConfig(
         title: 'Mission 3: Expedition Patrol',
         message:
           activeModal === 'EXPEDITION'
-            ? 'Select your champions to dispatch them on patrol.'
-            : 'Tap Expeditions to dispatch heroes on a patrol mission.',
+            ? 'Select champions and start your patrol.'
+            : 'Dispatch champions on an Expedition patrol.',
       };
 
     case 'FIRST_EXPEDITION_RUNNING':
@@ -74,7 +74,7 @@ function resolveTutorialConfig(
             ? '[data-tutorial-target="expedition-claim-btn"]'
             : '[data-tutorial-target="building-expedition"]',
         title: 'Patrol in Progress…',
-        message: 'Heroes are on patrol. Wait for the patrol to complete to collect loot.',
+        message: 'Patrol running. Claim rewards when complete.',
       };
 
     case 'FIRST_EXPEDITION_CLAIM_REQUIRED':
@@ -84,7 +84,7 @@ function resolveTutorialConfig(
             ? '[data-tutorial-target="expedition-claim-btn"]'
             : '[data-tutorial-target="building-expedition"]',
         title: 'Claim Patrol Rewards',
-        message: 'Tap Claim Rewards to receive your 3rd Summon Ticket.',
+        message: 'Tap Claim Rewards to collect your 3rd Summon Ticket.',
       };
 
     case 'THIRD_SUMMON_REQUIRED':
@@ -96,8 +96,8 @@ function resolveTutorialConfig(
         title: 'Mission 4: Complete Squad',
         message:
           activeModal === 'RECRUITMENT'
-            ? 'Use your earned ticket to summon your 3rd champion.'
-            : 'Visit the Altar of Heroes to complete your starting 3-hero squad.',
+            ? 'Use your ticket to summon your 3rd champion.'
+            : 'Visit the Altar of Heroes to recruit your 3rd champion.',
       };
 
     case 'COMPLETE':
@@ -110,8 +110,8 @@ function resolveTutorialConfig(
           title: 'Mission 5: The Infinite Tower',
           message:
             activeModal === 'TOWER'
-              ? 'Challenge Floor 1 to begin your first 3v3 tactical turn battle!'
-              : 'Squad complete! Enter The Infinite Tower to challenge Floor 1 and begin 3v3 tactical battles.',
+              ? 'Challenge Floor 1 to begin 3v3 battles!'
+              : 'Squad ready! Enter The Infinite Tower to challenge Floor 1.',
         };
       }
       return null;
@@ -307,7 +307,7 @@ export const TutorialSpotlightOverlay: React.FC = () => {
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed">
-            Sanctuary is your aerial tactical fortress. Assemble an elite 3-hero squad to explore the realm and conquer The Infinite Tower.
+            Assemble your 3-hero squad to conquer The Infinite Tower.
           </p>
 
           <div className="w-full grid grid-cols-3 gap-2 py-2.5 border-y border-slate-800 text-[11px] text-slate-400">

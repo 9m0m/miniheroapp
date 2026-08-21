@@ -18,8 +18,8 @@ const ROWS: GridRow[] = ['FRONT', 'BACK'];
 const COLS: GridCol[] = ['LEFT', 'CENTER', 'RIGHT'];
 
 const ROW_TITLES: Record<string, { label: string; sub: string; color: string }> = {
-  FRONT: { label: 'FRONTLINE (VANGUARD)', sub: 'Absorbs direct melee strikes & shields backline', color: 'text-amber-400' },
-  BACK: { label: 'BACKLINE (REARGUARD)', sub: 'Ranged DPS & Healers protected behind frontline', color: 'text-cyan-400' },
+  FRONT: { label: 'FRONTLINE', sub: 'Melee & Vanguard Tank', color: 'text-amber-400' },
+  BACK: { label: 'BACKLINE', sub: 'Ranged DPS & Support', color: 'text-cyan-400' },
 };
 
 export const PartyBuilder: React.FC<PartyBuilderProps> = ({
@@ -216,18 +216,18 @@ export const PartyBuilder: React.FC<PartyBuilderProps> = ({
       {/* Team Tactic Selector */}
       <div className="p-2.5 bg-[#0e131d] border border-[#1e293b] rounded-lg mb-2.5 flex flex-col gap-1">
         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          Team Tactical Directive
+          Tactical Directive
         </label>
         <select
           value={tactic}
           onChange={(e) => setTactic(e.target.value as TeamTactic)}
           className="bg-[#080b12] border border-[#1e293b] rounded px-2.5 py-1.5 text-xs text-amber-300 font-bold focus:outline-none focus:ring-1 focus:ring-amber-400"
         >
-          <option value="BALANCED">Balanced (Standard Front-to-Back)</option>
-          <option value="FOCUS_LOW_HP">Focus Low HP (Finisher Priority)</option>
-          <option value="BACKLINE_PRESSURE">Backline Pressure (Assassins Bypass Front)</option>
-          <option value="DEFENSIVE">Defensive (Heals & Shields First)</option>
-          <option value="CONTROL_FIRST">Control First (Debuffs & CC)</option>
+          <option value="BALANCED">Balanced (Front-to-Back)</option>
+          <option value="FOCUS_LOW_HP">Focus Lowest HP</option>
+          <option value="BACKLINE_PRESSURE">Target Backline</option>
+          <option value="DEFENSIVE">Defensive Priority</option>
+          <option value="CONTROL_FIRST">Control First (CC / Debuffs)</option>
         </select>
       </div>
 

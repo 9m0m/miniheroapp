@@ -53,7 +53,7 @@ export const SkillTreeModal: React.FC = () => {
       onClose={closeModal}
       icon={<Zap size={18} className="text-yellow-400" />}
       title={`${hero.name} Skill Tree`}
-      description="Permanent combat passive enhancements"
+      description="Hero Passive Talents"
     >
       <div className="space-y-2.5 select-none">
         {/* Skill Nodes List */}

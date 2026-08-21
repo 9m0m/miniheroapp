@@ -100,7 +100,7 @@ export const QuestsModal: React.FC<QuestsModalProps> = ({ isOpen, onClose }) => 
       onClose={onClose}
       icon={<Award size={18} className="text-amber-400" />}
       title="Quest Chronicles"
-      description="Complete tactical bounties and claim milestone chests"
+      description="Daily & Weekly Bounties"
     >
       <div className="space-y-3">
         {/* Tab Navigation */}

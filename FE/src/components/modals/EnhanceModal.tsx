@@ -74,7 +74,7 @@ export const EnhanceModal: React.FC = () => {
       onClose={closeEnhanceModal}
       icon={<Hammer size={18} className="text-amber-400" />}
       title="Forge & Reinforce"
-      description="Deterministic Equipment Stat Scaling"
+      description="Equipment Stat Enhancement"
     >
       <div className="space-y-3 select-none">
         {/* Item Preview Card */}

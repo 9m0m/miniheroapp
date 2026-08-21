@@ -32,7 +32,7 @@ export const PiggyBankModal: React.FC = () => {
       onClose={closeModal}
       icon={<PiggyBank size={18} className="text-amber-400" />}
       title="Gem Piggy Bank"
-      description="Battle accumulator vault"
+      description="Battle Gem Vault"
     >
       <div className="space-y-3 select-none">
         {/* Gem Accumulator Vault Display */}

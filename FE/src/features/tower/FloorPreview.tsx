@@ -62,8 +62,7 @@ export const FloorPreview: React.FC<FloorPreviewProps> = ({
           )}
         </div>
 
-        <h2 className="text-base font-black text-slate-100 mb-0.5">{floor.name}</h2>
-        <p className="text-[11px] text-slate-400 mb-2.5">{floor.description}</p>
+        <h2 className="text-base font-black text-slate-100 mb-1.5">{floor.name}</h2>
 
         <div className="flex items-center gap-4 text-xs font-mono text-slate-300">
           <div>

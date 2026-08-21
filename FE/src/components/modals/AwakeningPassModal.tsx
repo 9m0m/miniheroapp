@@ -41,7 +41,7 @@ export const AwakeningPassModal: React.FC = () => {
       onClose={closeModal}
       icon={<Crown size={18} className="text-purple-400" />}
       title="Hero Awakening Pass"
-      description="7-Day streak check-in rewards"
+      description="7-Day Check-in"
     >
       <div className="space-y-3 select-none">
         {/* 7 Days List */}

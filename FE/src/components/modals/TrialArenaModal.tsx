@@ -209,7 +209,7 @@ export const TrialArenaModal: React.FC<TrialArenaModalProps> = ({ isOpen, onClos
         onClose={onClose}
         icon={<Trophy size={18} className="text-amber-400" />}
         title="Weekly Trial Arena"
-        description="Benchmark squad DPS and compete on the realm leaderboard"
+        description="DPS Benchmark & Leaderboard"
       >
         <div className="space-y-3">
           {/* Mode Navigation Tabs & Privacy Toggle */}

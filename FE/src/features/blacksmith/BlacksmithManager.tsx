@@ -304,9 +304,9 @@ export default function BlacksmithManager() {
             <div>
               <div className="flex items-center justify-between">
                 <h4 className="font-black text-sm text-amber-300">{selectedRecipe.name}</h4>
-                <Badge variant="accent" size="xs">Slot: {selectedRecipe.slot}</Badge>
+                <Badge variant="accent" size="xs">{selectedRecipe.slot}</Badge>
               </div>
-              <p className="text-[11px] text-slate-300 mt-1">{selectedRecipe.description}</p>
+              <div className="text-[11px] font-mono font-bold text-emerald-400 mt-1">{selectedRecipe.statsPreview}</div>
             </div>
 
             {/* Quality Chance Table */}
