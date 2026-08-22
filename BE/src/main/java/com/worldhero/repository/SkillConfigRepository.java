@@ -11,6 +11,5 @@ import java.util.Optional;
 @Repository
 public interface SkillConfigRepository extends JpaRepository<SkillConfigEntity, String> {
     List<SkillConfigEntity> findByHeroClass(HeroClass heroClass);
-    Optional<SkillConfigEntity> findByHeroClassAndSkillId(HeroClass heroClass, String skillId);
     Optional<SkillConfigEntity> findBySkillId(String skillId);
 }

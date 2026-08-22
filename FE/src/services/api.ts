@@ -10,7 +10,6 @@ import { upgradeApi } from './upgradeApi';
 import { cubeApi } from './cubeApi';
 import { craftingApi } from './craftingApi';
 import { monetizationApi } from './monetizationApi';
-import { skillApi } from './skillApi';
 import { adminApi } from './adminApi';
 import { chestVaultApi } from './chestVaultApi';
 
@@ -49,10 +48,6 @@ export const gameApi = {
   smashPiggyBank: monetizationApi.smashPiggyBank,
   claimDailyPass: monetizationApi.claimDailyPass,
   mockWldPay: monetizationApi.mockWldPay,
-
-  // Phase 4: Skill Tree & Worlds
-  getSkillTree: skillApi.getSkillTree,
-  upgradeSkill: skillApi.upgradeSkill,
 };
 
 export {
@@ -63,5 +58,4 @@ export {
   cubeApi,
   craftingApi,
   monetizationApi,
-  skillApi,
 };

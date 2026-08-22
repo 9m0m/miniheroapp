@@ -6,6 +6,5 @@ export * from './upgradeApi';
 export * from './cubeApi';
 export * from './craftingApi';
 export * from './monetizationApi';
-export * from './skillApi';
 export * from './adminApi';
 export * from './api';

@@ -3,7 +3,6 @@ export type ActiveModal =
   | 'AWAKENING_PASS' 
   | 'MOCK_WLD_PAY' 
   | 'ENHANCE' 
-  | 'SKILL_TREE' 
   | 'QUESTS'
   | 'TRIAL_ARENA'
   | 'CORE_PARTY_FORMATION'

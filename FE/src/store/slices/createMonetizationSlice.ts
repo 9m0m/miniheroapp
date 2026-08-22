@@ -1,21 +1,28 @@
 import { StateCreator } from 'zustand';
-import { HeroClass } from '../../types/enums';
 import { ItemInstance } from '../../types/item.types';
+import { ActiveModal } from '../../types/monetization.types';
 import { idempotencyManager } from '@/services/idempotency';
+import { monetizationApi } from '@/services/monetizationApi';
 
 export interface MonetizationSlice {
   userId: string | null;
   piggyBankGems: number;
   isGoldenPassActive: boolean;
   goldenPassClaimedDays: number[];
-  activeModal: string | null;
-  mockPaymentConfig: any;
   loginDayIndex: number;
+  loginLastClaimedAt: string | null;
+  canClaimToday: boolean;
+  activeModal: ActiveModal;
+  mockPaymentConfig: any;
+  enhancingItem: ItemInstance | null;
+  openedRewardItem: ItemInstance | null;
 
   setUserId: (id: string | null) => void;
-  openModal: (modalName: string) => void;
+  openModal: (modalName: ActiveModal) => void;
   closeModal: () => void;
-  smashPiggyBank: () => boolean;
+  fetchMonetizationStatus: () => Promise<void>;
+  claimPassDay: (dayIndex: number) => Promise<void>;
+  smashPiggyBank: () => Promise<void>;
   claimDailyPass: (day: number) => boolean;
   buyGoldenPass: () => void;
   triggerWldPayment: (config: any) => void;
@@ -24,7 +31,6 @@ export interface MonetizationSlice {
   openChestVaultModal: () => void;
   openEnhanceModal: (item?: ItemInstance) => void;
   closeEnhanceModal: () => void;
-  openSkillTreeModal: (heroClass?: HeroClass) => void;
   closeChestRewardModal: () => void;
 }
 
@@ -33,9 +39,13 @@ export const createMonetizationSlice: StateCreator<any, [], [], MonetizationSlic
   piggyBankGems: 150,
   isGoldenPassActive: false,
   goldenPassClaimedDays: [],
+  loginDayIndex: 1,
+  loginLastClaimedAt: null,
+  canClaimToday: true,
   activeModal: null,
   mockPaymentConfig: null,
-  loginDayIndex: 1,
+  enhancingItem: null,
+  openedRewardItem: null,
 
   setUserId: (id) => {
     idempotencyManager.setUserId(id);
@@ -44,18 +54,50 @@ export const createMonetizationSlice: StateCreator<any, [], [], MonetizationSlic
   openModal: (modalName) => set({ activeModal: modalName }),
   closeModal: () => set({ activeModal: null, mockPaymentConfig: null }),
 
-  smashPiggyBank: () => {
-    const { piggyBankGems, gems, addFloatingText } = get();
-    if (piggyBankGems < 500) {
-      addFloatingText?.('Piggy Bank is not full yet!', 180, 70, '#F59E0B', true);
-      return false;
+  fetchMonetizationStatus: async () => {
+    try {
+      const res = await monetizationApi.getStatus();
+      set({
+        piggyBankGems: res.piggyBankGems,
+        isGoldenPassActive: res.isGoldenPassActive,
+        loginDayIndex: res.loginDayIndex,
+        loginLastClaimedAt: res.loginLastClaimedAt,
+        canClaimToday: res.canClaimToday,
+      });
+    } catch (err) {
+      console.warn('Failed to fetch monetization status from backend, using local defaults', err);
     }
-    set({
-      gems: gems + piggyBankGems,
-      piggyBankGems: 0,
-    });
-    addFloatingText?.(`Smashed Piggy Bank! +${piggyBankGems} Gems`, 180, 70, '#34D399', true);
-    return true;
+  },
+
+  claimPassDay: async (dayIndex) => {
+    const { addFloatingText, userId } = get();
+    try {
+      const res = await monetizationApi.claimDailyPass(userId || undefined);
+      set({
+        gems: res.gems,
+        loginDayIndex: res.loginDayIndex,
+        loginLastClaimedAt: res.loginLastClaimedAt,
+        canClaimToday: false,
+      });
+      addFloatingText?.(`Claimed Day ${dayIndex} Pass Rewards!`, 180, 70, '#F59E0B', true);
+    } catch (err: any) {
+      addFloatingText?.(err.message || 'Could not claim daily pass reward', 180, 70, '#EF4444', true);
+    }
+  },
+
+  smashPiggyBank: async () => {
+    const { addFloatingText, userId } = get();
+    try {
+      const res = await monetizationApi.smashPiggyBank(userId || undefined);
+      set({
+        gems: res.gems,
+        piggyBankGems: res.piggyBankGems,
+        activeModal: null,
+      });
+      addFloatingText?.('Smashed Piggy Bank! Gems Collected!', 180, 70, '#10B981', true);
+    } catch (err: any) {
+      addFloatingText?.(err.message || 'Could not unlock piggy bank', 180, 70, '#EF4444', true);
+    }
   },
 
   claimDailyPass: (day) => {
@@ -70,10 +112,13 @@ export const createMonetizationSlice: StateCreator<any, [], [], MonetizationSlic
   },
 
   buyGoldenPass: () => {
-    const { isGoldenPassActive, addFloatingText } = get();
-    if (isGoldenPassActive) return;
-    set({ isGoldenPassActive: true });
-    addFloatingText?.('Awakening Pass Premium Activated!', 180, 70, '#F59E0B', true);
+    get().triggerWldPayment({
+      featureKey: 'GOLDEN_PASS',
+      title: 'Hero Awakening Pass (7-Day)',
+      priceWld: 1.0,
+      description: 'Unlock 5x rewards daily, Royal Claymore, and the legendary Holy Blade Excalibur.',
+      benefitText: 'Instantly enables 5x multiplier on all 7-day milestone rewards.',
+    });
   },
 
   triggerWldPayment: (config) => {
@@ -84,13 +129,13 @@ export const createMonetizationSlice: StateCreator<any, [], [], MonetizationSlic
   },
 
   executeMockWldPay: () => {
-    const { mockPaymentConfig, buyGoldenPass, smashPiggyBank, addFloatingText } = get();
+    const { mockPaymentConfig, addFloatingText } = get();
     if (!mockPaymentConfig) return false;
 
-    if (mockPaymentConfig.action === 'BUY_GOLDEN_PASS') {
-      buyGoldenPass();
-    } else if (mockPaymentConfig.action === 'SMASH_PIGGY') {
-      smashPiggyBank();
+    if (mockPaymentConfig.featureKey === 'PIGGY_BANK') {
+      get().smashPiggyBank();
+    } else if (mockPaymentConfig.featureKey === 'GOLDEN_PASS') {
+      set({ isGoldenPassActive: true });
     }
 
     set({ activeModal: null, mockPaymentConfig: null });
@@ -104,9 +149,5 @@ export const createMonetizationSlice: StateCreator<any, [], [], MonetizationSlic
     set({ activeModal: 'ENHANCE' });
   },
   closeEnhanceModal: () => set({ activeModal: null, enhancingItem: null }),
-  openSkillTreeModal: (heroClass) => {
-    if (heroClass) set({ selectedHero: heroClass, selectedHeroClass: heroClass });
-    set({ activeModal: 'SKILL_TREE' });
-  },
   closeChestRewardModal: () => set({ activeModal: null, openedRewardItem: null }),
 });

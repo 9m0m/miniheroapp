@@ -17,7 +17,6 @@ import { PiggyBankModal } from '@/components/modals/PiggyBankModal';
 import { AwakeningPassModal } from '@/components/modals/AwakeningPassModal';
 import { MockWldPaymentSheet } from '@/components/modals/MockWldPaymentSheet';
 import { EnhanceModal } from '@/components/modals/EnhanceModal';
-import { SkillTreeModal } from '@/components/modals/SkillTreeModal';
 import { QuestsModal } from '@/components/modals/QuestsModal';
 import { TrialArenaModal } from '@/components/modals/TrialArenaModal';
 import { PartyFormationModal } from '@/components/modals/PartyFormationModal';
@@ -193,7 +192,6 @@ export default function GameMainPage() {
         <AwakeningPassModal />
         <MockWldPaymentSheet />
         <EnhanceModal />
-        <SkillTreeModal />
         <PartyFormationModal />
         <ChestRewardModal />
       </main>

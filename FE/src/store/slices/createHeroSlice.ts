@@ -37,7 +37,6 @@ export interface HeroSlice {
   getHeroTotalStats: (heroClass: HeroClass) => Stats;
   handlePartyWipe: () => void;
   autoEquipHero: (heroClass: HeroClass) => void;
-  upgradeHeroSkill: (heroClass: HeroClass, skillId: string) => boolean;
   levelUpHero: (heroId: string, targetLevel: number) => Promise<{ success: boolean; hero?: Hero }>;
   starUpHero: (heroId: string) => Promise<{ success: boolean; hero?: Hero }>;
 }
@@ -429,32 +428,6 @@ export const createHeroSlice: StateCreator<any, [], [], HeroSlice> = (set, get) 
         : `All slots filled or no gear available for ${heroClass}!`,
       180, 60, '#34D399'
     );
-  },
-
-  upgradeHeroSkill: (heroClass, skillId) => {
-    const { gold, heroes, addFloatingText } = get();
-    const cost = 500;
-    if (gold < cost) {
-      addFloatingText?.('Need 500 Gold to upgrade skill node!', 180, 60, '#EF4444', true);
-      return false;
-    }
-
-    const hero = heroes[heroClass];
-    if (!hero) return false;
-
-    const currentLvl = hero.skills?.[skillId] || 0;
-    const newSkills = { ...hero.skills, [skillId]: currentLvl + 1 };
-
-    set((s: any) => ({
-      gold: s.gold - cost,
-      heroes: {
-        ...s.heroes,
-        [heroClass]: { ...hero, skills: newSkills },
-      },
-    }));
-
-    addFloatingText?.(`Upgraded ${skillId} to Lv. ${currentLvl + 1}!`, 180, 60, '#38BDF8');
-    return true;
   },
 
   levelUpHero: async (heroId: string, targetLevel: number) => {
