@@ -26,7 +26,7 @@ export interface TopBottomCombatantCardProps {
   onSelectTarget: () => void;
 }
 
-export const TopBottomCombatantCard: React.FC<TopBottomCombatantCardProps> = ({
+const TopBottomCombatantCardComponent: React.FC<TopBottomCombatantCardProps> = ({
   entity,
   isActive,
   isLunging,
@@ -162,3 +162,27 @@ export const TopBottomCombatantCard: React.FC<TopBottomCombatantCardProps> = ({
     </div>
   );
 };
+
+export const TopBottomCombatantCard = React.memo(
+  TopBottomCombatantCardComponent,
+  (prev, next) => {
+    return (
+      prev.entity.entityId === next.entity.entityId &&
+      prev.entity.currentHp === next.entity.currentHp &&
+      prev.entity.maxHp === next.entity.maxHp &&
+      prev.entity.shield === next.entity.shield &&
+      prev.entity.isDowned === next.entity.isDowned &&
+      prev.entity.evadeCharges === next.entity.evadeCharges &&
+      prev.entity.regenStacks === next.entity.regenStacks &&
+      prev.isActive === next.isActive &&
+      prev.isLunging === next.isLunging &&
+      prev.isHit === next.isHit &&
+      prev.isFrozen === next.isFrozen &&
+      prev.isPlayerSide === next.isPlayerSide &&
+      prev.isTargeted === next.isTargeted &&
+      prev.floatingTexts.length === next.floatingTexts.length &&
+      (prev.floatingTexts.length === 0 ||
+        prev.floatingTexts.every((t, i) => t.id === next.floatingTexts[i]?.id))
+    );
+  }
+);

@@ -9,6 +9,5 @@ export * from './item.types';
 export * from './hero.types';
 export * from './user.types';
 export * from './monetization.types';
-export * from './skill.types';
 export * from './admin.types';
 export * from './chestVault.types';
